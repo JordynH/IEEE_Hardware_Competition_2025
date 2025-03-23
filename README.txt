@@ -1,0 +1,1 @@
+This is the code used on the robot for the Vanderbilt's submission to the IEEE 2025 SoutheastCon Hardware Competition.
