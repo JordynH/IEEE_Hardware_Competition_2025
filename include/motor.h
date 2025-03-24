@@ -112,10 +112,12 @@ void init_motor_resources();
 
  void outtake_reset(motor_t *outtakeMotor);
 
- void move_distance(motor_t *motors, maneuver_t maneuver, float speed_scalar, double feet);
+ void move_distance_hardcode(motor_t *motors, maneuver_t maneuver, float speed_scalar, double feet);
 
- void rotate_angle(motor_t * motors, maneuver_t direction, float speed_scalar, int degrees);
+ void rotate_angle_hardcode(motor_t * motors, maneuver_t direction, float speed_scalar, int degrees);
 
- void move_distance_pid_angle(motor_t *motors, maneuver_t maneuver, float speed_scalar, double duration_seconds);
+ void move_pid_time(motor_t *motors, maneuver_t maneuver, float speed_scalar, double duration_seconds);
+
+ void move_pid_distance(motor_t *motors, maneuver_t maneuver, float speed_scalar, double distance_feet);
 
  #endif // MOTOR_H

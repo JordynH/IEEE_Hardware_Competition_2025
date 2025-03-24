@@ -30,7 +30,7 @@
 // Since the raw encoder produces ~537.7 ticks per motor revolution, the effective ticks per wheel revolution are:
 #define RAW_TICKS_PER_REV 537.7
 #define GEAR_RATIO 19.2
-#define TICKS_PER_REV 250 
+#define TICKS_PER_REV 268
 #define MAX_ENCODER_VELOCITY_TICKS 1300
 #define UPDATE_INTERVAL_MS 50
 
@@ -269,7 +269,7 @@ void outtake_reset(motor_t *outtakeMotor) {
     dc_set_speed(outtakeMotor, 0);
 }
 
-void move_distance(motor_t *motors, maneuver_t maneuver, float speed_scalar, double feet) {
+void move_distance_hardcode(motor_t *motors, maneuver_t maneuver, float speed_scalar, double feet) {
     int64_t start_time = esp_timer_get_time();
     int64_t elapsed_time = 0;
     double multiplier = 0.0;
@@ -287,7 +287,7 @@ void move_distance(motor_t *motors, maneuver_t maneuver, float speed_scalar, dou
     perform_maneuver(motors, STOP, NULL, 0); 
 }
 
-void rotate_angle(motor_t *motors, maneuver_t maneuver, float speed_scalar, int degrees) {
+void rotate_angle_hardcode(motor_t *motors, maneuver_t maneuver, float speed_scalar, int degrees) {
     int64_t start_time = esp_timer_get_time();
     int64_t elapsed_time = 0;
     int64_t target_time = 1000000 * degrees / ((speed_scalar / 25) * ROTATE_SPEED_CONSTANT);
@@ -311,70 +311,133 @@ void rotate_angle(motor_t *motors, maneuver_t maneuver, float speed_scalar, int 
 // }
 
 
-void move_distance_pid_angle(motor_t *motors, maneuver_t maneuver, float speed_scalar, double duration_seconds) {
+void move_pid_time(motor_t *motors, maneuver_t maneuver, float speed_scalar, double duration_seconds) {
     // Determine the desired angular velocity (in encoder ticks per second) based on desired speed
     double target_velocity = (speed_scalar / 100.0) * MAX_ENCODER_VELOCITY_TICKS;
-    if (maneuver == BACKWARD) {
-        target_velocity = -target_velocity;
+
+    // Define the direction multipliers for each motor (FR, FL, BR, BL)
+    int direction[4];
+
+    switch (maneuver) {
+        case FORWARD:
+            direction[0] = 1;  direction[1] = -1;
+            direction[2] = 1;  direction[3] = -1;
+            break;
+        case BACKWARD:
+            direction[0] = -1; direction[1] = 1;
+            direction[2] = -1; direction[3] = 1;
+            break;
+        case LEFT:  // Strafe left
+            direction[0] = 1; direction[1] = 1;
+            direction[2] = -1;  direction[3] = -1;
+            break;
+        case RIGHT: // Strafe right
+            direction[0] = -1;  direction[1] = -1;
+            direction[2] = 1; direction[3] = 1;
+            break;
+        case ROTATE_CLOCKWISE:
+            direction[0] = -1; direction[1] = -1;
+            direction[2] = -1; direction[3] = -1;
+            break;
+        case ROTATE_COUNTERCLOCKWISE:
+            direction[0] = 1;  direction[1] = 1;
+            direction[2] = 1;  direction[3] = 1;
+            break;
+        default:
+            ESP_LOGE(TAG, "Invalid maneuver!");
+            return;
     }
-    
-    // Calculate a target angle that increases linearly: target_angle(t) = target_velocity * t
-    double target_angle = 0.0;
 
     // Initialize encoder
     init_all_encoders();
     
     // Initialize PID controllers for each motor (angle-based)
     PIDController pid_fr, pid_fl, pid_br, pid_bl;
-    pid_init(&pid_fr, 0.25, 0.05, 0.5);
-    pid_init(&pid_fl, 0.25, 0.05, 0.5);
-    pid_init(&pid_br, 0.25, 0.05, 0.5);
-    pid_init(&pid_bl, 0.25, 0.05, 0.5);
+    // pid_init(&pid_fr, 0.15, 0.05, 0.5);
+    // pid_init(&pid_fl, 0.15, 0.05, 0.5);
+    // pid_init(&pid_br, 0.15, 0.05, 0.5);
+    // pid_init(&pid_bl, 0.15, 0.05, 0.5);
+
+    pid_init(&pid_fr, 1.25, 0.0, 0.03);
+    pid_init(&pid_fl, 1.25, 0.0, 0.03);
+    pid_init(&pid_br, 1.25, 0.0, 0.03);
+    pid_init(&pid_bl, 0.8, 0.0, 0.03);
     
     // Get initial encoder counts as the starting angle (position)
-    int start_fr = read_encoder(PCNT_UNIT_0);
-    int start_fl = read_encoder(PCNT_UNIT_1);
-    int start_br = read_encoder(PCNT_UNIT_2);
-    int start_bl = read_encoder(PCNT_UNIT_3);
+    int start_angle[4] = {
+        read_encoder(PCNT_UNIT_0),  // Front Right
+        read_encoder(PCNT_UNIT_1),  // Front Left
+        read_encoder(PCNT_UNIT_2),  // Back Right
+        read_encoder(PCNT_UNIT_3)   // Back Left
+    };
     
     int64_t start_time = esp_timer_get_time();
     
     while ((esp_timer_get_time() - start_time) < (duration_seconds * 1e6)) {
         int64_t now = esp_timer_get_time();
         double elapsed = (now - start_time) / 1e6;
-        // Compute the evolving target angle (in encoder ticks)
-        target_angle = target_velocity * elapsed;
 
-        ESP_LOGI(TAG, "Target Angle: %d", (int) target_angle);
-        
-        // Compute desired target position for each motor
-        int target_fr = start_fr + target_angle;
-        int target_fl = start_fl - target_angle; // Left side should be inverted!
-        int target_br = start_br + target_angle;
-        int target_bl = start_bl - target_angle; // Left side should be inverted!
-        
-        // Read current positions
-        int current_fr = read_encoder(PCNT_UNIT_0);
-        int current_fl = read_encoder(PCNT_UNIT_1);
-        int current_br = read_encoder(PCNT_UNIT_2);
-        int current_bl = read_encoder(PCNT_UNIT_3);
+        //ESP_LOGI(TAG, "Target Angle: %d", (int) target_angle);
 
-        ESP_LOGI(TAG, "Read Angle: %d", (int) current_fr);
+        // Compute the evolving target angles for each motor
+        double target_angle = target_velocity * elapsed;
+        int target[4] = {
+            start_angle[0] + direction[0] * target_angle,  // Front Right
+            start_angle[1] + direction[1] * target_angle,  // Front Left
+            start_angle[2] + direction[2] * target_angle,  // Back Right
+            start_angle[3] + direction[3] * target_angle   // Back Left
+        };
         
+         // Read current positions
+         int current[4] = {
+            read_encoder(PCNT_UNIT_0),
+            read_encoder(PCNT_UNIT_1),
+            read_encoder(PCNT_UNIT_2),
+            read_encoder(PCNT_UNIT_3)
+        };
+
         // Compute PID corrections based on position error
-        int output_fr = pid_compute(&pid_fr, target_fr, current_fr);
-        int output_fl = pid_compute(&pid_fl, target_fl, current_fl);
-        int output_br = pid_compute(&pid_br, target_br, current_br);
-        int output_bl = pid_compute(&pid_bl, target_bl, current_bl);
+        int output[4] = {
+            pid_compute(&pid_fr, target[0], current[0]),
+            pid_compute(&pid_fl, target[1], current[1]),
+            pid_compute(&pid_br, target[2], current[2]),
+            pid_compute(&pid_bl, target[3], current[3])
+        };
+
+        //ESP_LOGI(TAG, "Read Angle: %d", (int) current_fr);
         
         // Apply the PID outputs (dc_set_speed clamps internally)
-        dc_set_speed(&motors[0], -output_fr);
-        dc_set_speed(&motors[1], -output_fl);
-        dc_set_speed(&motors[2], -output_br);
-        dc_set_speed(&motors[3], -output_bl);
+        for (int i = 0; i < 4; i++) {
+            dc_set_speed(&motors[i], -output[i]);  // Negative sign ensures correct direction
+        }
         
         vTaskDelay(pdMS_TO_TICKS(UPDATE_INTERVAL_MS));
     }
     
     perform_maneuver(motors, STOP, NULL, 0);
 }
+
+void move_pid_distance(motor_t *motors, maneuver_t maneuver, float speed_scalar, double distance_feet) {
+    // Base speed measurement: At speed_scalar = 15, robot moves at 9 inches/sec (0.75 ft/sec)
+    double base_speed_scalar = 15.0;
+    double base_speed_ft_per_sec = 9.4 / 12.0;  // Convert 9 in/sec to ft/sec
+
+    // Scale speed proportionally: new speed = base_speed * (speed_scalar / base_speed_scalar)
+    double actual_speed_ft_per_sec = base_speed_ft_per_sec * (speed_scalar / base_speed_scalar);
+
+    // Avoid division by zero if speed scalar is too low
+    if (actual_speed_ft_per_sec <= 0) {
+        ESP_LOGE("MOVE_WRAPPER", "Invalid speed scalar: %.2f. Must be greater than 0.", speed_scalar);
+        return;
+    }
+
+    // Compute duration required to travel the given distance
+    double duration_seconds = distance_feet / actual_speed_ft_per_sec;
+
+    ESP_LOGI("MOVE_WRAPPER", "Moving %.2f feet at speed_scalar %.2f for %.2f seconds", 
+             distance_feet, speed_scalar, duration_seconds);
+
+    // Call the movement function
+    move_pid_time(motors, maneuver, speed_scalar, duration_seconds);
+}
+
