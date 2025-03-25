@@ -112,7 +112,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
     int done = 0;
 
     double dy_threshold = 1;
-    double tx_threshold = 5;
+    double tx_threshold = 3;
     double tx_epsilon = 10;
     double ta_epsilon = 0.01;
 
@@ -143,9 +143,9 @@ void aprilTag_main(int desired_fid, double ta_target) {
             // --- STRAFE until centered ---
             while (fabs(tx) > tx_threshold) {
                 if (tx < -tx_threshold) {
-                    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
+                    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 23);
                 } else if (tx > tx_threshold) {
-                    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 25);
+                    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 23);
                 }
                 vTaskDelay(pdMS_TO_TICKS(20));
                 // Refresh tx reading
@@ -168,9 +168,9 @@ void aprilTag_main(int desired_fid, double ta_target) {
             
             //&& (fabs(tx) < tx_epsilon)
             if ((dy < (-1 * dy_threshold)) && (fabs(tx) < tx_epsilon)) {
-                perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 15);
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 18);
             } else if ((dy > dy_threshold) && (fabs(tx) < tx_epsilon)) {
-                perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 15);
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 18);
             }
 
             // Rotate while BOTH:
@@ -253,8 +253,22 @@ void aprilTag_main(int desired_fid, double ta_target) {
 
             vTaskDelay(pdMS_TO_TICKS(10));
         }
-
-        done = 1; // finished
+        double tx_tmp = get_fiducial_tx();
+        double tx = 0.0;
+        if (fabs(tx_tmp) > 0.00001) {
+            tx = tx_tmp;
+        }
+        double bottom_left[2];
+        double bottom_right[2];
+        double dy = 0.0;
+        get_point_at_index(0, bottom_left);
+        get_point_at_index(1, bottom_right);
+        if (fabs(bottom_right[1] - bottom_left[1]) > 0.00001) {
+            dy = bottom_right[1] - bottom_left[1];
+        }
+        if ((tx < tx_threshold) && (fabs(dy) < dy_threshold)) {
+            done = 1;
+        }
     }
 
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0); // HERE
