@@ -24,22 +24,22 @@ int setup() {
 
 
     /* 3. RPI SPI Communication Initialization Sequence */
-    spi_secondary_init();
+    // spi_secondary_init();
     
-    char* received = "";
-    ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
-    while((strcmp(received, "INITIALIZATION_MESSAGE"))) {
-        send_message("INITIALIZATION_MESSAGE");
-        // ESP_LOGI(TAG, "message = %s", get_message());
-        received = get_message();
-        vTaskDelay(pdMS_TO_TICKS(5));
-    }
-    ESP_LOGI(TAG, "communication established");
-    send_message("communication established");
-    //vTaskDelay(pdMS_TO_TICKS(500));
+    // char* received = "";
+    // ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
+    // while((strcmp(received, "INITIALIZATION_MESSAGE"))) {
+    //     send_message("INITIALIZATION_MESSAGE");
+    //     // ESP_LOGI(TAG, "message = %s", get_message());
+    //     received = get_message();
+    //     vTaskDelay(pdMS_TO_TICKS(5));
+    // }
+    // ESP_LOGI(TAG, "communication established");
+    // send_message("communication established");
+    // //vTaskDelay(pdMS_TO_TICKS(500));
     
-    ESP_LOGI(TAG, "Waiting for Pipeline Switch");
-    switch_pipeline(1);
+    // ESP_LOGI(TAG, "Waiting for Pipeline Switch");
+    // switch_pipeline(1);
     
     
     led_flash(&robot_singleton.headlight);
@@ -340,38 +340,18 @@ void wiring_test_sequence() {
 }
 
 void predetermined_test() {
-    // move_distance(robot_singleton.omniMotors, FORWARD, 25, 10);
-    // vTaskDelay(pdMS_TO_TICKS(400));
-    // move_distance(robot_singleton.omniMotors, BACKWARD, 25, 10);
-    // vTaskDelay(pdMS_TO_TICKS(400));
-    // rotate_angle(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 25, 270);
-    // vTaskDelay(pdMS_TO_TICKS(400));
-    // rotate_angle(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 25, 270);
-    // vTaskDelay(pdMS_TO_TICKS(400));
-    // move_distance(robot_singleton.omniMotors, LEFT, 25, 10);
-    // vTaskDelay(pdMS_TO_TICKS(400));
-    // move_distance(robot_singleton.omniMotors, RIGHT, 25, 10);
-    // vTaskDelay(pdMS_TO_TICKS(400));
+    dc_set_speed(&robot_singleton.intakeMotor, -80);
 
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.25);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.5);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.5);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.6);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.5);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
 
-    // move_distance_pid_angle(robot_singleton.omniMotors, FORWARD, 15, 5);
-    // vTaskDelay(pdMS_TO_TICKS(500));
-
-    // move_distance_pid_angle(robot_singleton.omniMotors, RIGHT, 15, 5);
-    // vTaskDelay(pdMS_TO_TICKS(500));
-
-    // move_distance_pid_angle(robot_singleton.omniMotors, BACKWARD, 15, 5);
-    // vTaskDelay(pdMS_TO_TICKS(500));
-
-    // move_distance_pid_angle(robot_singleton.omniMotors, LEFT, 15, 5);
-    // vTaskDelay(pdMS_TO_TICKS(500));
-
-    // rotate_angle(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 50, 90);
-    // vTaskDelay(pdMS_TO_TICKS(500));
-
-    // rotate_angle(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 50, 90);
-    
+    dc_set_speed(&robot_singleton.intakeMotor, 0);
 }
 
 void demo() {
