@@ -107,14 +107,14 @@ void full_motor_init() {
     servo_set_angle(&robot_singleton.armMotor, 90);
 }
 
-void aprilTag_main(int desired_fid, int ta_target) {
+void aprilTag_main(int desired_fid, double ta_target) {
     switch_pipeline(6);
     int done = 0;
 
     double dy_threshold = 1;
     double tx_threshold = 5;
-    double tx_epsilon = 18;
-    double ta_epsilon = 5;
+    double tx_epsilon = 10;
+    double ta_epsilon = 0.01;
 
     while (!done) {
         while (get_v() == 0) { // FIXME: Check accuracy of hard-coded path and potentially 
@@ -122,67 +122,77 @@ void aprilTag_main(int desired_fid, int ta_target) {
             vTaskDelay(pdMS_TO_TICKS(20));
         }
 
-
-        // Check if this is the correct tag
-        // if (desired_fid != get_fid()) {
-        //     rotate_in_place();// HERE
-        //     vTaskDelay(pdMS_TO_TICKS(500));
-        //     continue;
-        // }
         int aligned = 0;
         while (!aligned) {
 
-            double tx = get_fiducial_tx();
+            double tx = 0.0;
+            double tx_tmp = 0.0;
+
+            tx_tmp = get_fiducial_tx();
+            if (fabs(tx_tmp) > 0.00001) {
+                tx = tx_tmp;
+            }
             double bottom_left[2];
             double bottom_right[2];
             double dy = 0.0;
-            get_point_bottom_left(bottom_left);
-            get_point_bottom_right(bottom_right);
-            dy = bottom_right[1] - bottom_left[1];
-
+            get_point_at_index(0, bottom_left);
+            get_point_at_index(1, bottom_right);
+            if (fabs(bottom_right[1] - bottom_left[1]) > 0.00001) {
+                dy = bottom_right[1] - bottom_left[1];
+            }
             // --- STRAFE until centered ---
             while (fabs(tx) > tx_threshold) {
                 if (tx < -tx_threshold) {
-                    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 20);
+                    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
                 } else if (tx > tx_threshold) {
-                    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 20);
+                    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 25);
                 }
                 vTaskDelay(pdMS_TO_TICKS(20));
                 // Refresh tx reading
-                tx = get_fiducial_tx();
+                tx_tmp = get_fiducial_tx();
+                if (fabs(tx_tmp) > 0.00001) {
+                    tx = tx_tmp;
+                }
                 ESP_LOGI("MAIN", "tx: %f" , fabs(tx));
             }
             perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
 
             ESP_LOGI(TAG, "I did it! I got past the tx threshold! Here's my final tx value: %f" , fabs(tx));
 
-            // --- STRAFE if tx is centered ---
-            get_point_bottom_left(bottom_left);
-            get_point_bottom_right(bottom_right);
-            dy = bottom_right[1] - bottom_left[1];
-
-            if (dy < -dy_threshold && fabs(tx) < tx_epsilon) {
-                perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 25);  // HERE
-            } else if (dy > dy_threshold && fabs(tx) < tx_epsilon) {
-                perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 25);  // HERE
+            // --- ROTATE until epsilon ---
+            get_point_at_index(0, bottom_left);
+            get_point_at_index(1, bottom_right);
+            if (fabs(bottom_right[1] - bottom_left[1]) > 0.00001) {
+                dy = bottom_right[1] - bottom_left[1];
+            }
+            
+            //&& (fabs(tx) < tx_epsilon)
+            if ((dy < (-1 * dy_threshold)) && (fabs(tx) < tx_epsilon)) {
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 15);
+            } else if ((dy > dy_threshold) && (fabs(tx) < tx_epsilon)) {
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 15);
             }
 
-            // Strafe while BOTH:
+            // Rotate while BOTH:
             // Not aligned (dy > threshold)
             // Still centered (tx < epsilon)
-            while (fabs(dy) > dy_threshold && fabs(tx) < tx_epsilon) {
+            while ((fabs(dy) > dy_threshold) && (fabs(tx) < tx_epsilon)) {
 
                 vTaskDelay(pdMS_TO_TICKS(20));
 
                 // Update dy and tx
-                get_point_bottom_left(bottom_left);
-                get_point_bottom_right(bottom_right);
-                if (bottom_right[1] - bottom_left[1] > 0.00001) {
+                get_point_at_index(0, bottom_left);
+                get_point_at_index(1, bottom_right);
+                if (fabs(bottom_right[1] - bottom_left[1]) > 0.00001) {
                     dy = bottom_right[1] - bottom_left[1];
                 }
-                
-                tx = get_fiducial_tx();
+                ESP_LOGI(TAG, "jordyn:");
+                tx_tmp = get_fiducial_tx();
+                if (fabs(tx_tmp) > 0.00001) {
+                    tx = tx_tmp;
+                }
                 ESP_LOGI(TAG, "dy value: %f" , fabs(dy));
+                ESP_LOGI(TAG, "Here's the heap size: %u", (unsigned int)esp_get_free_heap_size());
             }
 
             ESP_LOGI(TAG, "I did it! I got past the dy threshold! Here's my final dy value: %f" , fabs(dy));
@@ -193,42 +203,55 @@ void aprilTag_main(int desired_fid, int ta_target) {
             perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
 
             // Refresh for aligned check
-            tx = get_fiducial_tx();
-            get_point_bottom_left(bottom_left);
-            get_point_bottom_right(bottom_right);
-            dy = bottom_right[1] - bottom_left[1];
+            tx_tmp = get_fiducial_tx();
+            if (fabs(tx_tmp) > 0.00001) {
+                tx = tx_tmp;
+            }
+            get_point_at_index(0, bottom_left);
+            get_point_at_index(1, bottom_right);
+            if (fabs(bottom_right[1] - bottom_left[1]) > 0.00001) {
+                dy = bottom_right[1] - bottom_left[1];
+            }
 
             // Exit if both alignment (dy) and centering (tx) are good
-            if (fabs(tx) <= tx_threshold && fabs(dy) <= dy_threshold) {
+            if ((fabs(tx) <= tx_threshold) && (fabs(dy) <= dy_threshold)) {
                 aligned = 1;
             }
 
-            vTaskDelay(pdMS_TO_TICKS(50));
+            vTaskDelay(pdMS_TO_TICKS(10));
         }
 
         // --- DISTANCE PHASE (TA Control) ---
         int distance_done = 0;
-
+        double ta = 0.0;
+        double ta_temp = 0.0;
         while (!distance_done) {
-            double ta = get_fiducial_ta();
+            ta_temp = get_fiducial_ta();
+            if (ta_temp > 0.00001) {
+                ta = ta_temp;
+                ESP_LOGI("bananaman", "namananab %f" , ta);
+            }
+            // ESP_LOGI("JORDYN", "(THIS IS SPAR)TA = %f" , ta);
 
             if (ta < (ta_target - ta_epsilon)) {
-                perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, 20); // HERE
-                while (get_fiducial_ta() < (ta_target - ta_epsilon)) {
-                    vTaskDelay(pdMS_TO_TICKS(20));
-                }
-                perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
+                perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, 18);
+                // while (get_fiducial_ta() < (ta_target - ta_epsilon)) {
+                //     // ESP_LOGI("TAG", "Whiskey TAngo = %f" , ta);
+                //     vTaskDelay(pdMS_TO_TICKS(20));
+                // }
+                // perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
             } else if (ta > (ta_target + ta_epsilon)) {
-                perform_maneuver(robot_singleton.omniMotors, BACKWARD, NULL, 20); // HERE
-                while (get_fiducial_ta() > (ta_target + ta_epsilon)) {
-                    vTaskDelay(pdMS_TO_TICKS(20));
-                }
-                perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
+                perform_maneuver(robot_singleton.omniMotors, BACKWARD, NULL, 18);
+                // while (get_fiducial_ta() > (ta_target + ta_epsilon)) {
+                //     // ESP_LOGI("quaker", "i cant graduate because i dont know waht a gant chart is = %f" , ta);
+                //     vTaskDelay(pdMS_TO_TICKS(20));
+                // }
+                // perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
             } else {
                 distance_done = 1;
             }
 
-            vTaskDelay(pdMS_TO_TICKS(50));
+            vTaskDelay(pdMS_TO_TICKS(10));
         }
 
         done = 1; // finished
@@ -353,7 +376,7 @@ int setup() {
         send_message("INITIALIZATION_MESSAGE");
         // ESP_LOGI(TAG, "message = %s", get_message());
         received = get_message();
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
     ESP_LOGI(TAG, "communication established");
     send_message("communication established");
@@ -452,7 +475,16 @@ int app_main() {
     }
 
     perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
-    aprilTag_main(-1, 0.8);
+    aprilTag_main(-1, 0.08);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 25);
     // demo();
@@ -471,11 +503,11 @@ int app_main() {
     // perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 25);
 
     //predetermined_test();
-
+    ESP_LOGI("MAIN", "got here");
     while (1) {
         vTaskDelay(100);
     }
-    ESP_LOGI("MAIN", "got here");
+    
     // vTaskDelay(200);
     /*all motor test*/
     // perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, 25);

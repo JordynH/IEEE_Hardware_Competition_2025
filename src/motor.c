@@ -94,7 +94,7 @@ void motor_control_init(motor_t *motor) {
  
     // Assign PWM output pin
  
-    ESP_LOGI("MOTOR", "Initialized motor on pin %d", motor->pwm_pin);
+    //ESP_LOGI("MOTOR", "Initialized motor on pin %d", motor->pwm_pin);
 
     
 }
@@ -131,7 +131,7 @@ void servo_set_angle(motor_t *servo, float angle) {
  
     mcpwm_generator_set_action_on_compare_event(servo->gen, cmp_event);
  
-    ESP_LOGI("SERVO", "Servo angle set to %.2f degrees (Pulse width: %dus)", angle, (int)pulse_width);
+    // ESP_LOGI("SERVO", "Servo angle set to %.2f degrees (Pulse width: %dus)", angle, (int)pulse_width);
 }
  
  
@@ -149,8 +149,8 @@ void dc_set_speed(motor_t *motor, float speed) {
     // Set comparator value dynamically
     mcpwm_comparator_set_compare_value(motor->comparator, (uint32_t)pulse_width);
  
-    ESP_LOGI("MOTOR", "Motor speed set: pin %d, pulse %dus (speed %.2f)",
-             motor->pwm_pin, (int)pulse_width, speed);
+    // ESP_LOGI("MOTOR", "Motor speed set: pin %d, pulse %dus (speed %.2f)",
+            //  motor->pwm_pin, (int)pulse_width, speed);
 }
  
  
@@ -164,9 +164,9 @@ void perform_maneuver(motor_t *motors, maneuver_t maneuver, float speeds[4], flo
     motor_t *front_left = &motors[1];
     motor_t *back_right = &motors[2];
     motor_t *back_left = &motors[3];
-    double FR_ADJUSTMENT = -1 * 0.95 * 0.9;
-    double FL_ADJUSTMENT = 1* 0.9;
-    double BR_ADJUSTMENT = -1 * 0.95* 0.9;
+    double FR_ADJUSTMENT = -1 * 0.95;
+    double FL_ADJUSTMENT = 1;
+    double BR_ADJUSTMENT = -1 * 0.95;
     double BL_ADJUSTMENT = 1;
     switch (maneuver) {
         case FORWARD:
@@ -427,15 +427,15 @@ void move_pid_distance(motor_t *motors, maneuver_t maneuver, float speed_scalar,
 
     // Avoid division by zero if speed scalar is too low
     if (actual_speed_ft_per_sec <= 0) {
-        ESP_LOGE("MOVE_WRAPPER", "Invalid speed scalar: %.2f. Must be greater than 0.", speed_scalar);
+        // ESP_LOGE("MOVE_WRAPPER", "Invalid speed scalar: %.2f. Must be greater than 0.", speed_scalar);
         return;
     }
 
     // Compute duration required to travel the given distance
     double duration_seconds = distance_feet / actual_speed_ft_per_sec;
 
-    ESP_LOGI("MOVE_WRAPPER", "Moving %.2f feet at speed_scalar %.2f for %.2f seconds", 
-             distance_feet, speed_scalar, duration_seconds);
+    // ESP_LOGI("MOVE_WRAPPER", "Moving %.2f feet at speed_scalar %.2f for %.2f seconds", 
+            //  distance_feet, speed_scalar, duration_seconds);
 
     // Call the movement function
     move_pid_time(motors, maneuver, speed_scalar, duration_seconds);

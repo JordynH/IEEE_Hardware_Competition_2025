@@ -94,13 +94,15 @@ char* get_fiducial_fam();
 
 cJSON* get_fiducial_pts();
 
-void get_point_bottom_left(double ret[2]);
+// void get_point_bottom_left(double* ret);
 
-void get_point_bottom_right(double ret[2]);
+// void get_point_bottom_right(double* ret);
 
-void get_point_top_right(double ret[2]);
+// void get_point_top_right(double ret[2]);
 
-void get_point_top_left(double ret[2]);
+// void get_point_top_left(double ret[2]);
+
+void get_point_at_index(int index, double* ret);
 
 double get_fiducial_ta();
 

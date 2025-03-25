@@ -173,12 +173,15 @@ void process_received_data(char *input) {
             if (!receivedJson) {
                 ESP_LOGE(TAG, "Invalid JSON!");
                 ESP_LOGI(TAG, "Message Data: %s", message_data);
-                vTaskDelay(500);                
+
+
+                //cJSON_Delete(receivedJson);
             } else {
                 // ESP_LOGI(TAG, "Valid JSON received");
                 if(xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
-                    cJSON_Delete(receivedData.jsonInput);
+                    
                     receivedData.jsonInput = receivedJson;
+
                     xSemaphoreGive(data_mutex);
                 } else {
                     cJSON_Delete(receivedJson);
@@ -240,36 +243,21 @@ char* get_message() {
 }
 
 // cJSON* get_last_json() {
-//     cJSON *returnJSON = cJSON_CreateObject();
-//     if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
-//         returnJSON = receivedData.jsonInput;
-//         xSemaphoreGive(data_mutex);
-//     }
-//     return returnJSON;
-// }
-
-// cJSON* get_last_json() {
-//     // Start by creating a new JSON object
 //     cJSON *returnJSON = NULL;
 
-//     if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(200))) {
-        
-//         // Check if receivedData.jsonInput is not NULL and is valid
+//     if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(1000))) {
 //         if (receivedData.jsonInput != NULL) {
-            
-//             // Assign the valid jsonInput to returnJSON
-//             returnJSON = receivedData.jsonInput;
-            
+//             // ⚠️ Make a deep copy of the JSON object
+//             returnJSON = cJSON_Duplicate(receivedData.jsonInput, 1);
 //         } else {
 //             ESP_LOGW(TAG, "receivedData.jsonInput is NULL");
 //             returnJSON = cJSON_CreateObject();
 //         }
-//         ESP_LOGI(TAG, "before");
-//         // Release the semaphore
+
 //         xSemaphoreGive(data_mutex);
-//         ESP_LOGI(TAG, "after");
 //     } else {
 //         ESP_LOGW(TAG, "Failed to take semaphore");
+//         returnJSON = cJSON_CreateObject();
 //     }
 
 //     return returnJSON;
@@ -280,10 +268,13 @@ cJSON* get_last_json() {
 
     if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(1000))) {
         if (receivedData.jsonInput != NULL) {
-            // ⚠️ Make a deep copy of the JSON object
-            returnJSON = cJSON_Duplicate(receivedData.jsonInput, 1);
+            // Instead of duplicating, simply return the pointer.
+            // NOTE: The caller MUST NOT free this pointer.
+            returnJSON = receivedData.jsonInput;
         } else {
             ESP_LOGW(TAG, "receivedData.jsonInput is NULL");
+            // Create an empty object; the caller is responsible for freeing
+            // this object if it's used, but ideally this branch is rarely hit.
             returnJSON = cJSON_CreateObject();
         }
 
@@ -434,7 +425,7 @@ int get_fiducial_fID() {
     if (!fiducial_item) return 0;
 
     cJSON *fID = cJSON_GetObjectItem(fiducial_item, "fID");
-    if (!fID || cJSON_IsNumber(fID)) {
+    if (!fID || !cJSON_IsNumber(fID)) {
         ESP_LOGW(TAG, "fID not found or not a number");
         return 0;
     }
@@ -445,94 +436,57 @@ int get_fiducial_fID() {
 
 cJSON* get_fiducial_pts() {
     cJSON *fiducial = get_fiducial();
-    //if (!fiducial) return 0;
+    if (!fiducial) return 0;
 
     cJSON *fiducial_item = cJSON_GetArrayItem(fiducial, 0);
-    //if (!fiducial_item) return 0;
+    if (!fiducial_item) return 0;
 
     cJSON *pts = cJSON_GetObjectItem(fiducial_item, "pts");
-    //if (!pts) return 
+    if (!pts) return 0;
     return pts;
 }
 
-void get_point_bottom_left(double ret[2]) {
+void get_point_at_index(int index, double* ret) {
+    // Initialize output to zero
     ret[0] = 0;
     ret[1] = 0;
 
     cJSON *pts = get_fiducial_pts();
     if (!pts) return;
 
-    cJSON *point = cJSON_GetArrayItem(pts, 0);
+    // (Optional) Debug print the JSON. Remember to free the printed string.
+    char *jsonprint = cJSON_Print(pts);
+    ESP_LOGI(TAG, "Fiducial Points JSON: %s", jsonprint);
+    free(jsonprint);
+
+    // Check if the requested index is within bounds.
+    int array_size = cJSON_GetArraySize(pts);
+    if (index < 0 || index >= array_size) {
+        ESP_LOGW(TAG, "Index %d out of bounds (array size: %d)", index, array_size);
+        return;
+    }
+
+    ESP_LOGI(TAG, "interstellar");
+    // Get the point at the desired index (0 for bottom left, 1 for bottom right)
+    cJSON *point = cJSON_GetArrayItem(pts, index);
+    if (!point) {
+        //cJSON_Delete(pts);
+        return;
+    }
+
+    ESP_LOGI(TAG, "i am groot");
 
     cJSON *x_item = cJSON_GetArrayItem(point, 0);
     cJSON *y_item = cJSON_GetArrayItem(point, 1);
-
-    ret[0] = x_item->valuedouble;
-    ret[1] = y_item->valuedouble;
-
-    cJSON_Delete(pts);
-    cJSON_Delete(point);
-    cJSON_Delete(x_item);
-    cJSON_Delete(y_item);
-    return;
+    if (x_item && y_item) {
+        ret[0] = x_item->valuedouble;
+        ret[1] = y_item->valuedouble;
+    }
+    // Free the JSON object if get_fiducial_pts() returns a new allocation.
+    //cJSON_Delete(pts);
+    ESP_LOGI(TAG, "completar");
 }
 
-
-void get_point_bottom_right(double ret[2]) {
-    ret[0] = 0;
-    ret[1] = 0;
-
-    cJSON *pts = get_fiducial_pts();
-    if (!pts) return;
-
-    cJSON *point = cJSON_GetArrayItem(pts, 1);
-
-    cJSON *x_item = cJSON_GetArrayItem(point, 0);
-    cJSON *y_item = cJSON_GetArrayItem(point, 1);
-
-    ret[0] = x_item->valuedouble;
-    ret[1] = y_item->valuedouble;
-
-    cJSON_Delete(pts);
-    cJSON_Delete(point);
-    cJSON_Delete(x_item);
-    cJSON_Delete(y_item);
-    return;
-}
-
-void get_point_top_right(double ret[2]) {
-    ret[0] = 0;
-    ret[1] = 0;
-
-    cJSON *pts = get_fiducial_pts();
-    if (!pts) return;
-
-    cJSON *point = cJSON_GetArrayItem(pts, 2);
-
-    cJSON *x_item = cJSON_GetArrayItem(point, 0);
-    cJSON *y_item = cJSON_GetArrayItem(point, 1);
-
-    ret[0] = x_item->valuedouble;
-    ret[1] = y_item->valuedouble;
-    return;
-}
-
-void get_point_top_left(double ret[2]) {
-    ret[0] = 0;
-    ret[1] = 0;
-
-    cJSON *pts = get_fiducial_pts();
-    if (!pts) return;
-
-    cJSON *point = cJSON_GetArrayItem(pts, 3);
-
-    cJSON *x_item = cJSON_GetArrayItem(point, 0);
-    cJSON *y_item = cJSON_GetArrayItem(point, 1);
-
-    ret[0] = x_item->valuedouble;
-    ret[1] = y_item->valuedouble;
-    return;
-}
 
 char* get_fiducial_fam() {
     cJSON *fiducial = get_fiducial();
@@ -773,10 +727,10 @@ void update_ema(EMAState *ema) {
     double ty_nocross = 0.0;
     double typ = 0.0;
     if (strcmp(ema->pipeline_type, "fiducial") == 0) {
-        get_point_bottom_left(point_bottom_left);
-        get_point_bottom_right(point_bottom_right);
-        get_point_top_right(point_top_right);
-        get_point_top_left(point_top_left);
+        get_point_at_index(0, point_bottom_left);
+        get_point_at_index(1, point_bottom_right);
+        get_point_at_index(2, point_top_right);
+        get_point_at_index(3, point_top_left);
 
         ta          = get_fiducial_ta();
         tx          = get_fiducial_tx();

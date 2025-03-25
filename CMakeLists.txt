@@ -1,3 +1,3 @@
 cmake_minimum_required(VERSION 3.16.0)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(IEEE-Robot_Encoders)
+project(IEEE_Hardware_Competition_2025)
