@@ -15,6 +15,7 @@
 #include "freertos/task.h"
 #include "spi_secondary.h"
 #include "led.h"
+#include "math.h"
 
 
 #define TAG "MAIN"
@@ -56,6 +57,16 @@ int64_t start_time_us;
     Px Commands = Switch to Pipeline x    
 */
 
+void switch_pipeline(int new_pipeline) {
+    char message[5];
+    sprintf(message, "P%d", new_pipeline);
+    send_message(message);
+    while (get_pID() != (double)new_pipeline) {
+        send_message(message);
+        // vTaskDelay(5);
+    }
+}
+
 void full_motor_init() {
     init_motor_resources();
 
@@ -95,6 +106,130 @@ void full_motor_init() {
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
     servo_set_angle(&robot_singleton.armMotor, 90);
 }
+
+void aprilTag_main(int desired_fid, int ta_target) {
+    switch_pipeline(6);
+    int done = 0;
+
+    double dy_threshold = 0.05;
+    double tx_threshold = 0.05;
+    double tx_epsilon = 1.5;
+    // double ta_target = 1.0;
+    double ta_epsilon = 0.05;
+
+    while (!done) {
+
+        // Search phase: look for tag
+        while (get_v() == 0) {
+            //perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, 25);// HERE
+            vTaskDelay(pdMS_TO_TICKS(20));
+        }
+
+        // Check if this is the correct tag
+        // if (desired_fid != get_fid()) {
+        //     rotate_in_place();// HERE
+        //     vTaskDelay(pdMS_TO_TICKS(500));
+        //     continue;
+        // }
+        int aligned = 0;
+        while (!aligned) {
+
+            double tx = get_fiducial_tx();
+            double bottom_left[2];
+            double bottom_right[2];
+            double dy = 0.0;
+            get_point_bottom_left(bottom_left);
+            get_point_bottom_right(bottom_right);
+            dy = bottom_right[1] - bottom_left[1];
+
+            // --- ROTATE until centered ---
+            while (fabs(tx) > tx_threshold) {
+                if (tx < -tx_threshold) {
+                    perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 20);
+                } else if (tx > tx_threshold) {
+                    perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 20);
+                }
+                vTaskDelay(pdMS_TO_TICKS(20));
+                // Refresh tx reading
+                tx = get_fiducial_tx();
+            }
+            perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
+
+            // --- STRAFE if tx is centered ---
+            get_point_bottom_left(bottom_left);
+            get_point_bottom_right(bottom_right);
+            dy = bottom_right[1] - bottom_left[1];
+
+            if (dy < -dy_threshold && fabs(tx) < tx_epsilon) {
+                perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);  // HERE
+            } else if (dy > dy_threshold && fabs(tx) < tx_epsilon) {
+                perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 25);  // HERE
+            }
+
+            // Strafe while BOTH:
+            // Not aligned (dy > threshold)
+            // Still centered (tx < epsilon)
+            while (fabs(dy) > dy_threshold && fabs(tx) < tx_epsilon) {
+
+                vTaskDelay(pdMS_TO_TICKS(20));
+
+                // Update dy and tx
+                get_point_bottom_left(bottom_left);
+                get_point_bottom_right(bottom_right);
+                dy = bottom_right[1] - bottom_left[1];
+                tx = get_fiducial_tx();
+            }
+
+            // Stop strafing when either:
+            // - dy is small enough (aligned)
+            // - tx is too large (not centered anymore)
+            perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
+
+            // Refresh for aligned check
+            tx = get_fiducial_tx();
+            get_point_bottom_left(bottom_left);
+            get_point_bottom_right(bottom_right);
+            dy = bottom_right[1] - bottom_left[1];
+
+            // Exit if both alignment (dy) and centering (tx) are good
+            if (fabs(tx) <= tx_threshold && fabs(dy) <= dy_threshold) {
+                aligned = 1;
+            }
+
+            vTaskDelay(pdMS_TO_TICKS(50));
+        }
+
+        // --- DISTANCE PHASE (TA Control) ---
+        int distance_done = 0;
+
+        while (!distance_done) {
+            double ta = get_fiducial_ta();
+
+            if (ta < (ta_target - ta_epsilon)) {
+                perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, 20); // HERE
+                while (get_fiducial_ta() < (ta_target - ta_epsilon)) {
+                    vTaskDelay(pdMS_TO_TICKS(20));
+                }
+                perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
+            } else if (ta > (ta_target + ta_epsilon)) {
+                perform_maneuver(robot_singleton.omniMotors, BACKWARD, NULL, 20); // HERE
+                while (get_fiducial_ta() > (ta_target + ta_epsilon)) {
+                    vTaskDelay(pdMS_TO_TICKS(20));
+                }
+                perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
+            } else {
+                distance_done = 1;
+            }
+
+            vTaskDelay(pdMS_TO_TICKS(50));
+        }
+
+        done = 1; // finished
+    }
+
+    perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0); // HERE
+}
+
 
 void wiring_test_sequence() {
 
@@ -170,6 +305,7 @@ void wiring_test_sequence() {
 }
 
 
+
 /**
  * @brief This function will initialize all peripherals and subsystems.
  * 
@@ -203,26 +339,30 @@ int setup() {
 
     /* 3. RPI SPI Communication Initialization Sequence */
     spi_secondary_init();
-
-    // while((strcmp(get_message(), "INITIALIZATION_MESSAGE"))) {
-    //     send_message("INITIALIZATION_MESSAGE");
-    //     ESP_LOGI(TAG, "message = %s", get_message());
-    //     ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
-        
-    //     vTaskDelay(pdMS_TO_TICKS(10));
-    // }
-    // ESP_LOGI(TAG, "communication established");
-    // send_message("communication established");
-    // send_message("P1");
+    
+    char* received = "";
+    ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
+    while((strcmp(received, "INITIALIZATION_MESSAGE"))) {
+        send_message("INITIALIZATION_MESSAGE");
+        // ESP_LOGI(TAG, "message = %s", get_message());
+        received = get_message();
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+    ESP_LOGI(TAG, "communication established");
+    send_message("communication established");
+    //vTaskDelay(pdMS_TO_TICKS(500));
+    
+    ESP_LOGI(TAG, "Waiting for Pipeline Switch");
+    switch_pipeline(1);
+    
+    
     led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);
-    vTaskDelay(pdMS_TO_TICKS(500));
-    // vTaskDelay(pdMS_TO_TICKS(2000));
-
 
     return 0;
 }
+
 
 void power_test_sequence() {
     led_flash(&robot_singleton.headlight);
@@ -303,6 +443,9 @@ int app_main() {
         vTaskDelay(200);
         esp_restart();
     }
+
+    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
+    aprilTag_main(-1, 0.8);
     // demo();
     // dc_set_speed(&robot_singleton. outtakeMotor, -20);
     //wiring_test_sequence();
@@ -318,7 +461,7 @@ int app_main() {
     // move_distance(robot_singleton.omniMotors, LEFT, 25, 8);
     // perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 25);
 
-    predetermined_test();
+    //predetermined_test();
 
     while (1) {
         vTaskDelay(100);

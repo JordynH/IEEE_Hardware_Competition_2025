@@ -69,7 +69,7 @@ esp_err_t spi_secondary_init(void) {
 
 
 void spi_secondary_task(void *arg) {
-    
+    receivedData.jsonInput = cJSON_CreateObject();
     init_ema(&purple_object_ema, 0.2f, "retro");
     init_ema(&april_tag_ema, 0.2, "fiducial");
     init_ema(&line_following_ema, 0.2, "retro");
@@ -91,21 +91,34 @@ void spi_secondary_task(void *arg) {
     while (1) {
         // Wait for master to send data
         memset(new_buf, 0, sizeof(new_buf));
-        // if (count > 5 && count < 10) {
-        //     // memcpy(command_to_send, "SWITCH TO PL3", strlen("SWITCH TO PL3"));
-        //     send_message("test this");
+        // if (strlen(command_to_send) > 0) {
+        //     memcpy(send_buf, command_to_send, strlen(command_to_send));
+        //     command_to_send[0] = '\0';
+        //     command_flag = true;
         // }
+
         if (strlen(command_to_send) > 0) {
-            memcpy(send_buf, command_to_send, strlen(command_to_send));
-            command_to_send[0] = '\0';
+            memset(send_buf, 0, sizeof(send_buf));  // Clear old data
+            size_t len = strlen(command_to_send);
+            if (len >= CHUNK_SIZE) len = CHUNK_SIZE - 1;
+            memcpy(send_buf, command_to_send, len);
+            send_buf[len] = '\0';  // Null-terminate
+            command_to_send[0] = '\0';  // Mark message as sent
             command_flag = true;
+            // ESP_LOGI(TAG, "sent: %s", command_to_send);
         }
+
+        
+        //
+        //
+        //
         ret = spi_slave_transmit(SPI2_HOST, &transaction, portMAX_DELAY);
         if (command_flag) {
             memset(send_buf, 0, sizeof(send_buf));
             memcpy(send_buf, "ACK", strlen("ACK"));
             command_flag = false;
         }
+        
         if (ret == ESP_OK) {
             new_buf[CHUNK_SIZE] = '\0'; // Ensure null-termination
             // Append received data to json_buffer
@@ -162,24 +175,28 @@ void process_received_data(char *input) {
                 ESP_LOGI(TAG, "Message Data: %s", message_data);
                 vTaskDelay(500);                
             } else {
+                // ESP_LOGI(TAG, "Valid JSON received");
                 if(xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
+                    cJSON_Delete(receivedData.jsonInput);
                     receivedData.jsonInput = receivedJson;
                     xSemaphoreGive(data_mutex);
+                } else {
+                    cJSON_Delete(receivedJson);
                 }
-                if (get_v()) {
-                    if (get_pID() == 1) {
-                        update_ema(&purple_object_ema);
-                    } else if (get_pID() == 6) {
-                        update_ema(&april_tag_ema);
-                        double bottomRight[2];
-                        // get_point_bottom_right(bottomRight);
-                        get_ema_point_bottom_right(&april_tag_ema, bottomRight);
-                        ESP_LOGI(TAG, "bottom right: %f, %f", bottomRight[0], bottomRight[1]);
-                    } //TODO ADD LINE FOLLOWING PARSER
-                }
-                ESP_LOGI(TAG, "Valid JSON received");
+                // if (get_v()) {
+                //     if (get_pID() == 1) {
+                //         update_ema(&purple_object_ema);
+                //     } else if (get_pID() == 6) {
+                //         update_ema(&april_tag_ema);
+                //         double bottomRight[2];
+                //         // get_point_bottom_right(bottomRight);
+                //         get_ema_point_bottom_right(&april_tag_ema, bottomRight);
+                //         ESP_LOGI(TAG, "bottom right: %f, %f", bottomRight[0], bottomRight[1]);
+                //     } //TODO ADD LINE FOLLOWING PARSER
+                // }
+                
                 // ESP_LOGI(TAG, "Message Data: %s", message_data);
-                // char* jsonprint = cJSON_Print(receivedJson);
+                // char* jsonprint = cJSON_Print(receivedData.jsonInput);
                 // ESP_LOGI(TAG, "%s", jsonprint);
                 // if (strcmp(get_pTYPE(), "pipe_color") == 0) {
                 //     update_ema(&purple_object_ema);
@@ -187,7 +204,7 @@ void process_received_data(char *input) {
                 // double ta_value = get_ema_ta(&purple_object_ema);
                 // ESP_LOGI(TAG, "Current TA EMA: %f", ta_value);
             }
-            cJSON_Delete(receivedJson);
+            
             break;
         case 'M':
             // ESP_LOGI(TAG, "Processing Message...");
@@ -201,8 +218,8 @@ void process_received_data(char *input) {
 }
 
 void send_message(char *message) {
-    // memset(command_to_send, 0, sizeof(command_to_send));  // Clear entire buffer
-    // memcpy(command_to_send, message, strlen(message));
+    memset(command_to_send, 0, sizeof(command_to_send));  // Clear entire buffer
+    memcpy(command_to_send, message, strlen(message));
     command_to_send[0] = '\0';
     memcpy(command_to_send, message, strlen(message));
 }
@@ -222,14 +239,63 @@ char* get_message() {
     return returnMessage;
 }
 
+// cJSON* get_last_json() {
+//     cJSON *returnJSON = cJSON_CreateObject();
+//     if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
+//         returnJSON = receivedData.jsonInput;
+//         xSemaphoreGive(data_mutex);
+//     }
+//     return returnJSON;
+// }
+
+// cJSON* get_last_json() {
+//     // Start by creating a new JSON object
+//     cJSON *returnJSON = NULL;
+
+//     if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(200))) {
+        
+//         // Check if receivedData.jsonInput is not NULL and is valid
+//         if (receivedData.jsonInput != NULL) {
+            
+//             // Assign the valid jsonInput to returnJSON
+//             returnJSON = receivedData.jsonInput;
+            
+//         } else {
+//             ESP_LOGW(TAG, "receivedData.jsonInput is NULL");
+//             returnJSON = cJSON_CreateObject();
+//         }
+//         ESP_LOGI(TAG, "before");
+//         // Release the semaphore
+//         xSemaphoreGive(data_mutex);
+//         ESP_LOGI(TAG, "after");
+//     } else {
+//         ESP_LOGW(TAG, "Failed to take semaphore");
+//     }
+
+//     return returnJSON;
+// }
+
 cJSON* get_last_json() {
     cJSON *returnJSON = NULL;
-    if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
-        returnJSON = receivedData.jsonInput;
+
+    if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(1000))) {
+        if (receivedData.jsonInput != NULL) {
+            // ⚠️ Make a deep copy of the JSON object
+            returnJSON = cJSON_Duplicate(receivedData.jsonInput, 1);
+        } else {
+            ESP_LOGW(TAG, "receivedData.jsonInput is NULL");
+            returnJSON = cJSON_CreateObject();
+        }
+
         xSemaphoreGive(data_mutex);
+    } else {
+        ESP_LOGW(TAG, "Failed to take semaphore");
+        returnJSON = cJSON_CreateObject();
     }
+
     return returnJSON;
 }
+
 
 cJSON* get_retro() {
     cJSON *retro = cJSON_GetObjectItem(get_last_json(), "Retro");
@@ -595,16 +661,46 @@ double get_fiducial_typ() {
 }
 
 
-double get_pID() {
-    cJSON *pID = cJSON_GetObjectItem(get_last_json(), "pID");
-    if (!pID || !cJSON_IsNumber(pID)) {
-        ESP_LOGW(TAG, "pID not found or not a number");
-        return -1;
-    }
+// double get_pID() {
+//     cJSON *pID = cJSON_GetObjectItem(get_last_json(), "pID");
+//     if (!pID || !cJSON_IsNumber(pID)) {
+//         ESP_LOGW(TAG, "pID not found or not a number");
+//         return -1;
+//     }
 
+//     ESP_LOGI(TAG, "pID: %f", pID->valuedouble);
+//     return pID->valuedouble;
+// }
+
+double get_pID() {
+    // Get the last JSON object
+    cJSON *json = get_last_json();
+    if (!json) {
+        ESP_LOGW(TAG, "JSON object is NULL");
+        return -1;  // Return an invalid value to indicate an error
+    }
+    
+    // Get the pID item from the JSON
+    cJSON *pID = cJSON_GetObjectItem(json, "pID"); //crashes here
+    
+    if (!pID) {
+        // vTaskDelay(pdTICKS_TO_MS(1000));
+        ESP_LOGW(TAG, "pID not found in JSON");
+        return -1;  // Return an error value if pID is missing
+    }
+    
+    // Ensure pID is a number
+    if (!cJSON_IsNumber(pID)) {
+        // vTaskDelay(pdTICKS_TO_MS(1000));
+        ESP_LOGW(TAG, "pID is not a number");
+        return -1;  // Return an error value if pID is not a number
+    }
+    
+    // If all checks pass, return the pID value
     ESP_LOGI(TAG, "pID: %f", pID->valuedouble);
     return pID->valuedouble;
 }
+
 
 char* get_pTYPE() {
     cJSON *pTYPE = cJSON_GetObjectItem(get_last_json(), "pTYPE");
