@@ -111,19 +111,17 @@ void aprilTag_main(int desired_fid, int ta_target) {
     switch_pipeline(6);
     int done = 0;
 
-    double dy_threshold = 0.05;
-    double tx_threshold = 0.05;
-    double tx_epsilon = 1.5;
-    // double ta_target = 1.0;
-    double ta_epsilon = 0.05;
+    double dy_threshold = 1;
+    double tx_threshold = 5;
+    double tx_epsilon = 18;
+    double ta_epsilon = 5;
 
     while (!done) {
-
-        // Search phase: look for tag
-        while (get_v() == 0) {
-            //perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, 25);// HERE
+        while (get_v() == 0) { // FIXME: Check accuracy of hard-coded path and potentially 
+                            // make this a while loop with a maneuver.
             vTaskDelay(pdMS_TO_TICKS(20));
         }
+
 
         // Check if this is the correct tag
         // if (desired_fid != get_fid()) {
@@ -142,18 +140,21 @@ void aprilTag_main(int desired_fid, int ta_target) {
             get_point_bottom_right(bottom_right);
             dy = bottom_right[1] - bottom_left[1];
 
-            // --- ROTATE until centered ---
+            // --- STRAFE until centered ---
             while (fabs(tx) > tx_threshold) {
                 if (tx < -tx_threshold) {
-                    perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 20);
+                    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 20);
                 } else if (tx > tx_threshold) {
-                    perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 20);
+                    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 20);
                 }
                 vTaskDelay(pdMS_TO_TICKS(20));
                 // Refresh tx reading
                 tx = get_fiducial_tx();
+                ESP_LOGI("MAIN", "tx: %f" , fabs(tx));
             }
             perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
+
+            ESP_LOGI(TAG, "I did it! I got past the tx threshold! Here's my final tx value: %f" , fabs(tx));
 
             // --- STRAFE if tx is centered ---
             get_point_bottom_left(bottom_left);
@@ -161,9 +162,9 @@ void aprilTag_main(int desired_fid, int ta_target) {
             dy = bottom_right[1] - bottom_left[1];
 
             if (dy < -dy_threshold && fabs(tx) < tx_epsilon) {
-                perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);  // HERE
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 25);  // HERE
             } else if (dy > dy_threshold && fabs(tx) < tx_epsilon) {
-                perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 25);  // HERE
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 25);  // HERE
             }
 
             // Strafe while BOTH:
@@ -176,9 +177,15 @@ void aprilTag_main(int desired_fid, int ta_target) {
                 // Update dy and tx
                 get_point_bottom_left(bottom_left);
                 get_point_bottom_right(bottom_right);
-                dy = bottom_right[1] - bottom_left[1];
+                if (bottom_right[1] - bottom_left[1] > 0.00001) {
+                    dy = bottom_right[1] - bottom_left[1];
+                }
+                
                 tx = get_fiducial_tx();
+                ESP_LOGI(TAG, "dy value: %f" , fabs(dy));
             }
+
+            ESP_LOGI(TAG, "I did it! I got past the dy threshold! Here's my final dy value: %f" , fabs(dy));
 
             // Stop strafing when either:
             // - dy is small enough (aligned)
@@ -446,6 +453,8 @@ int app_main() {
 
     perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
     aprilTag_main(-1, 0.8);
+    led_flash(&robot_singleton.headlight);
+    perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 25);
     // demo();
     // dc_set_speed(&robot_singleton. outtakeMotor, -20);
     //wiring_test_sequence();

@@ -469,6 +469,11 @@ void get_point_bottom_left(double ret[2]) {
 
     ret[0] = x_item->valuedouble;
     ret[1] = y_item->valuedouble;
+
+    cJSON_Delete(pts);
+    cJSON_Delete(point);
+    cJSON_Delete(x_item);
+    cJSON_Delete(y_item);
     return;
 }
 
@@ -487,6 +492,11 @@ void get_point_bottom_right(double ret[2]) {
 
     ret[0] = x_item->valuedouble;
     ret[1] = y_item->valuedouble;
+
+    cJSON_Delete(pts);
+    cJSON_Delete(point);
+    cJSON_Delete(x_item);
+    cJSON_Delete(y_item);
     return;
 }
 
