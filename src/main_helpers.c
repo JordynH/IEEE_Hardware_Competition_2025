@@ -24,11 +24,11 @@ int setup() {
 
 
     /* 3. RPI SPI Communication Initialization Sequence */
-    // spi_secondary_init();
+    spi_secondary_init();
     
     char* received = "";
     ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
-    while((strcmp(received, "INITIALIZATION_MESSAGE"))) {
+    while(get_pID() < 0 && (strcmp(received, "INITIALIZATION_MESSAGE"))) {
         send_message("INITIALIZATION_MESSAGE");
         // ESP_LOGI(TAG, "message = %s", get_message());
         received = get_message();
@@ -39,7 +39,7 @@ int setup() {
     //vTaskDelay(pdMS_TO_TICKS(500));
     
     // ESP_LOGI(TAG, "Waiting for Pipeline Switch");
-    // switch_pipeline(1);
+    switch_pipeline(1);
     
     
     led_flash(&robot_singleton.headlight);

@@ -29,7 +29,7 @@ int app_main() {
         vTaskDelay(200);
         esp_restart();
     }
-
+    dc_set_speed(&robot_singleton.intakeMotor, -80);
     perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
     aprilTag_main(-1, 0.08);
     led_flash(&robot_singleton.headlight);
@@ -43,10 +43,26 @@ int app_main() {
     led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 25);
+    led_flash(&robot_singleton.headlight);
+    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 25);
+    vTaskDelay(pdMS_TO_TICKS(200));
+    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
+    aprilTag_main(-1, 0.06);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
 
     ESP_LOGI("MAIN", "got here");
     while (1) {
         vTaskDelay(100);
+        led_flash(&robot_singleton.headlight);
     }
     
     vTaskDelay(5000);

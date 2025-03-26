@@ -143,7 +143,7 @@ void spi_secondary_task(void *arg) {
                     free(received_buffer);
                     received_buffer = NULL;
                     return;
-                }
+                } // CHECK THIS
                 
                 memcpy(received_buffer + received_buffer_size, new_buf, strlen(new_buf));
                 received_buffer_size = new_size;
