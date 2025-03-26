@@ -11,13 +11,7 @@
 
 #include "main_helpers.h"
 
-
 #define TAG "MAIN"
-/**
- * 
- */
-
-
 
 int64_t start_time_us;
 
@@ -36,10 +30,8 @@ int app_main() {
         esp_restart();
     }
 
-    switch_pipeline(6);
-
-    // perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
-    // aprilTag_main(-1, 0.08);
+    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
+    aprilTag_main(-1, 0.08);
     led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);
