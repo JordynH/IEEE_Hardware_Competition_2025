@@ -53,10 +53,14 @@ void switch_pipeline(int new_pipeline) {
     char message[5];
     sprintf(message, "P%d", new_pipeline);
     send_message(message);
+    led_flash(&robot_singleton.headlight);
     while (get_pID() != (double)new_pipeline) {
         send_message(message);
-        // vTaskDelay(5);
+        vTaskDelay(5);
     }
+    led_flash(&robot_singleton.headlight);
+    led_flash(&robot_singleton.headlight);
+
 }
 
 void full_motor_init() {
@@ -96,21 +100,25 @@ void full_motor_init() {
     dc_set_speed(&robot_singleton.intakeMotor, 0);
     dc_set_speed(&robot_singleton.outtakeMotor, 0);
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
-    servo_set_angle(&robot_singleton.armMotor, 90);
+    servo_set_angle(&robot_singleton.armMotor, 60);
 }
 
 void aprilTag_main(int desired_fid, double ta_target) {
     switch_pipeline(6);
     int done = 0;
 
-    double dy_threshold = 1;
+    double dy_threshold = 2;
     double tx_threshold = 3;
     double tx_epsilon = 10;
     double ta_epsilon = 0.01;
+    double ta_temp = 0.0;
+    double ta = 0.0;
 
     while (!done) {
         while (get_v() == 0) { // FIXME: Check accuracy of hard-coded path and potentially 
                             // make this a while loop with a maneuver.
+
+            led_flash(&robot_singleton.headlight);
             vTaskDelay(pdMS_TO_TICKS(20));
         }
 
@@ -134,10 +142,15 @@ void aprilTag_main(int desired_fid, double ta_target) {
             }
             // --- STRAFE until centered ---
             while (fabs(tx) > tx_threshold) {
+                ta_temp = get_fiducial_ta();
+                if (ta_temp > 0.00001) {
+                    ta = ta_temp;
+                    ESP_LOGI("bananaman", "namananab %f" , ta);
+                }
                 if (tx < -tx_threshold) {
-                    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 23);
+                    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, (23 * (1 - ta)));
                 } else if (tx > tx_threshold) {
-                    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 23);
+                    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, (23 * (1 - ta)));
                 }
                 vTaskDelay(pdMS_TO_TICKS(20));
                 // Refresh tx reading
@@ -215,8 +228,12 @@ void aprilTag_main(int desired_fid, double ta_target) {
 
         // --- DISTANCE PHASE (TA Control) ---
         int distance_done = 0;
-        double ta = 0.0;
-        double ta_temp = 0.0;
+        if (ta_target < 0) {
+            distance_done = 1;
+        }
+        
+        ta = 0.0;
+        ta_temp = 0.0;
         while (!distance_done) {
             ta_temp = get_fiducial_ta();
             if (ta_temp > 0.00001) {
@@ -226,14 +243,14 @@ void aprilTag_main(int desired_fid, double ta_target) {
             // ESP_LOGI("JORDYN", "(THIS IS SPAR)TA = %f" , ta);
 
             if (ta < (ta_target - ta_epsilon)) {
-                perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, 18);
+                perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, (18 * (1 - ta)));
                 // while (get_fiducial_ta() < (ta_target - ta_epsilon)) {
                 //     // ESP_LOGI("TAG", "Whiskey TAngo = %f" , ta);
                 //     vTaskDelay(pdMS_TO_TICKS(20));
                 // }
                 // perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
             } else if (ta > (ta_target + ta_epsilon)) {
-                perform_maneuver(robot_singleton.omniMotors, BACKWARD, NULL, 18);
+                perform_maneuver(robot_singleton.omniMotors, BACKWARD, NULL, (18 * (1 - ta)));
                 // while (get_fiducial_ta() > (ta_target + ta_epsilon)) {
                 //     // ESP_LOGI("quaker", "i cant graduate because i dont know waht a gant chart is = %f" , ta);
                 //     vTaskDelay(pdMS_TO_TICKS(20));
@@ -386,4 +403,14 @@ void power_test_sequence() {
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
     dc_set_speed(&robot_singleton.intakeMotor, 0);
 
+}
+
+void dump_in_geo() {
+    aprilTag_main(-1, 0.1);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
+    move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 1.75);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.85);
+    outtake_dump(&robot_singleton.outtakeMotor);
+    vTaskDelay(pdMS_TO_TICKS(500));
+    outtake_reset(&robot_singleton.outtakeMotor);
 }

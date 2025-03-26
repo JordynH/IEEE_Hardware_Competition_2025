@@ -129,9 +129,10 @@ void spi_secondary_task(void *arg) {
                 process_received_data(received_buffer);
                 ++count;
                 // ESP_LOGI(TAG, "%d", count);
-
-                free(received_buffer);
-                received_buffer = NULL;
+                if (!received_buffer) {
+                    free(received_buffer);
+                    received_buffer = NULL;
+                }
                 received_buffer_size = 0;
             } else {
 
@@ -154,9 +155,22 @@ void spi_secondary_task(void *arg) {
 }
 
 void process_received_data(char *input) {
+    if (input == NULL) {
+        ESP_LOGE(TAG, "nuh uh bud");
+        return;
+    }
     ESP_LOGI(TAG, "HEAP: %u", (unsigned int)esp_get_free_heap_size());
-
+    ESP_LOGI(TAG, "is this a thing or no: ");
     char message_type = input[0];
+
+    // size_t len = strlen(input + 1);
+    // char *message_data = malloc(len + 1);  // +1 for the null terminator
+    // if (message_data == NULL) {
+    //     ESP_LOGE(TAG, "Memory allocation failed");
+    //     return;
+    // }
+    // strcpy(message_data, input + 1);  // Now message_data is a safe, null-terminated string
+
     // char *message_data = memmove(input, input + 1, strlen(input));
     char *message_data = input + 1;
     // ESP_LOGI(TAG, "Message Type: %c", message_type);
@@ -185,15 +199,18 @@ void process_received_data(char *input) {
 
                 //cJSON_Delete(receivedJson);
             } else {
-                // ESP_LOGI(TAG, "Valid JSON received");
+                ESP_LOGI(TAG, "Valid JSON received");
                 if(xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
-                    cJSON_Delete(receivedData.jsonInput);
+                    if(receivedData.jsonInput != NULL) {
+                        cJSON_Delete(receivedData.jsonInput);
+                    }
                     receivedData.jsonInput = cJSON_Duplicate(receivedJson, true);
                     cJSON_Delete(receivedJson);
                     xSemaphoreGive(data_mutex);
                 } else {
                     cJSON_Delete(receivedJson);
                 }
+                ESP_LOGI(TAG, "no fun or games");
                 // if (get_v()) {
                 //     if (get_pID() == 1) {
                 //         update_ema(&purple_object_ema);

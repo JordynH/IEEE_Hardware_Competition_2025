@@ -68,4 +68,6 @@ void demo();
 
 void power_test_sequence();
 
+void dump_in_geo();
+
 #endif // MAIN_HELPERS_H
