@@ -36,8 +36,10 @@ int app_main() {
         esp_restart();
     }
 
-    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
-    aprilTag_main(-1, 0.08);
+    switch_pipeline(6);
+
+    // perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
+    // aprilTag_main(-1, 0.08);
     led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);

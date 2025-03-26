@@ -28,7 +28,7 @@ int setup() {
     
     char* received = "";
     ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
-    while((strcmp(received, "INITIALIZATION_MESSAGE"))) {
+    while(get_pID() < 0 && (strcmp(received, "INITIALIZATION_MESSAGE"))) {
         send_message("INITIALIZATION_MESSAGE");
         // ESP_LOGI(TAG, "message = %s", get_message());
         received = get_message();

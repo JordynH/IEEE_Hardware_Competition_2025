@@ -154,6 +154,8 @@ void spi_secondary_task(void *arg) {
 }
 
 void process_received_data(char *input) {
+    ESP_LOGI(TAG, "HEAP: %u", (unsigned int)esp_get_free_heap_size());
+
     char message_type = input[0];
     // char *message_data = memmove(input, input + 1, strlen(input));
     char *message_data = input + 1;
@@ -171,6 +173,12 @@ void process_received_data(char *input) {
             //ESP_LOGI(TAG, "Processing JSON...");
             cJSON *receivedJson = cJSON_Parse(message_data);
             if (!receivedJson) {
+                const char *error_ptr = cJSON_GetErrorPtr();
+                if (error_ptr) {
+                    printf("JSON Parsing Error: %s\n", error_ptr);
+                } else {
+                    printf("Unknown error occurred while parsing JSON.\n");
+                }
                 ESP_LOGE(TAG, "Invalid JSON!");
                 ESP_LOGI(TAG, "Message Data: %s", message_data);
 
@@ -179,9 +187,9 @@ void process_received_data(char *input) {
             } else {
                 // ESP_LOGI(TAG, "Valid JSON received");
                 if(xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
-                    
-                    receivedData.jsonInput = receivedJson;
-
+                    cJSON_Delete(receivedData.jsonInput);
+                    receivedData.jsonInput = cJSON_Duplicate(receivedJson, true);
+                    cJSON_Delete(receivedJson);
                     xSemaphoreGive(data_mutex);
                 } else {
                     cJSON_Delete(receivedJson);
@@ -241,27 +249,6 @@ char* get_message() {
     }
     return returnMessage;
 }
-
-// cJSON* get_last_json() {
-//     cJSON *returnJSON = NULL;
-
-//     if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(1000))) {
-//         if (receivedData.jsonInput != NULL) {
-//             // ⚠️ Make a deep copy of the JSON object
-//             returnJSON = cJSON_Duplicate(receivedData.jsonInput, 1);
-//         } else {
-//             ESP_LOGW(TAG, "receivedData.jsonInput is NULL");
-//             returnJSON = cJSON_CreateObject();
-//         }
-
-//         xSemaphoreGive(data_mutex);
-//     } else {
-//         ESP_LOGW(TAG, "Failed to take semaphore");
-//         returnJSON = cJSON_CreateObject();
-//     }
-
-//     return returnJSON;
-// }
 
 cJSON* get_last_json() {
     cJSON *returnJSON = NULL;
@@ -661,7 +648,7 @@ double get_pID() {
     }
     
     // If all checks pass, return the pID value
-    ESP_LOGI(TAG, "pID: %f", pID->valuedouble);
+    // ESP_LOGI(TAG, "pID: %f", pID->valuedouble);
     return pID->valuedouble;
 }
 
