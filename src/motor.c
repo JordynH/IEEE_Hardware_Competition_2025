@@ -250,8 +250,8 @@ void perform_maneuver(motor_t *motors, maneuver_t maneuver, float speeds[4], flo
 void outtake_dump(motor_t *outtakeMotor) {
     int64_t start_time = esp_timer_get_time();
     int64_t elapsed_time = 0;
-    dc_set_speed(outtakeMotor, 25);
-    while (elapsed_time < (5350000)) {
+    dc_set_speed(outtakeMotor, 35);
+    while (elapsed_time < (5350000 * 0.85)) {
         elapsed_time = esp_timer_get_time() - start_time;
         vTaskDelay(pdMS_TO_TICKS(100));
     }
@@ -264,6 +264,10 @@ void outtake_reset(motor_t *outtakeMotor) {
     while (gpio_get_level(GPIO_NUM_12) != 0) {
         vTaskDelay(pdMS_TO_TICKS(100));
     }
+    // dc_set_speed(outtakeMotor, 10);
+    // while (gpio_get_level(GPIO_NUM_12) == 0) {
+    //     vTaskDelay(pdMS_TO_TICKS(100));
+    // }
     dc_set_speed(outtakeMotor, 0);
 }
 

@@ -243,6 +243,7 @@ void process_received_data(char *input) {
             // ESP_LOGI(TAG, "message: %s", get_message());
             break;
     }
+    ESP_LOGI(TAG, "ah ha");
 }
 
 void send_message(char *message) {

@@ -12,13 +12,13 @@ void Outside_Cave_Part_1() {
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.35);
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.5);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.5);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.4);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.6);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.55);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.5);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.9);
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
 
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.85);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.0);
     perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 22);
 
@@ -32,7 +32,7 @@ void Outside_Cave_Part_1() {
 
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1);
 
-    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
     
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.8);
 }
@@ -42,7 +42,7 @@ void Inside_Cave() {
     led_set_brightness(NULL, 75);
 
     // Initial forward move.
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.2);
 
     // --- First outer loop iteration ---
     // Inner loop, d == 0:

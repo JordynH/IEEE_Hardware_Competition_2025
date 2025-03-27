@@ -30,20 +30,20 @@ int setup() {
     /* 4. RPI SPI Communication Initialization Sequence */
     spi_secondary_init();
     
-    // char* received = "";
-    // ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
-    // while(get_pID() < 0 && (strcmp(received, "INITIALIZATION_MESSAGE"))) {
-    //     send_message("INITIALIZATION_MESSAGE");
-    //     // ESP_LOGI(TAG, "message = %s", get_message());
-    //     received = get_message();
-    //     vTaskDelay(pdMS_TO_TICKS(5));
-    // }
-    // ESP_LOGI(TAG, "communication established");
-    // send_message("communication established");
-    // //vTaskDelay(pdMS_TO_TICKS(500));
+    char* received = "";
+    ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
+    while(get_pID() < 0 && (strcmp(received, "INITIALIZATION_MESSAGE"))) {
+        send_message("INITIALIZATION_MESSAGE");
+        // ESP_LOGI(TAG, "message = %s", get_message());
+        received = get_message();
+        vTaskDelay(pdMS_TO_TICKS(5));
+    }
+    ESP_LOGI(TAG, "communication established");
+    send_message("communication established");
+    //vTaskDelay(pdMS_TO_TICKS(500));
     
-    // // ESP_LOGI(TAG, "Waiting for Pipeline Switch");
-    // switch_pipeline(6);
+    // ESP_LOGI(TAG, "Waiting for Pipeline Switch");
+    switch_pipeline(6);
     
     
     led_flash(&robot_singleton.headlight);
@@ -104,7 +104,7 @@ void full_motor_init() {
     dc_set_speed(&robot_singleton.intakeMotor, 0);
     dc_set_speed(&robot_singleton.outtakeMotor, 0);
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
-    servo_set_angle(&robot_singleton.armMotor, 67);
+    servo_set_angle(&robot_singleton.armMotor, 60);
     outtake_reset(&robot_singleton.outtakeMotor);
 }
 

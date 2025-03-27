@@ -30,25 +30,16 @@ int app_main() {
         vTaskDelay(200);
         esp_restart();
     }
-    wait_for_push_start();
-    led_flash(&robot_singleton.headlight);
-    wait_for_start_led();
-    
-    Outside_Cave_Part_1();
 
-    Inside_Cave();
-
-    Outside_Cave_Part_2();
-
-    ESP_LOGI("MAIN", "got here");
-    while (1) {
-        vTaskDelay(100);
-        led_flash(&robot_singleton.headlight);
-    }
+    // ESP_LOGI("MAIN", "got here");
+    // while (1) {
+    //     vTaskDelay(100);
+    //     led_flash(&robot_singleton.headlight);
+    // }
     
 
     state_t currentState;
-    currentState = READY;       // Begin in LED SENSE mode
+    currentState = READY;       // Begin in READY mode
 
     while(currentState != END) {
         switch (currentState) {
@@ -59,13 +50,30 @@ int app_main() {
                 break;
             case READY:
                 wait_for_push_start();
-                currentState = START_LED_SENSE;
+                // currentState = START_LED_SENSE;
+                currentState = FULL_SEARCH;
                 break;
             case START_LED_SENSE:
                 wait_for_start_led();
                 currentState = FULL_SEARCH;
                 break;
             case FULL_SEARCH:
+
+                Outside_Cave_Part_1();
+
+                Inside_Cave();
+            
+                Outside_Cave_Part_2();
+
+
+
+                while (1) {
+                    vTaskDelay(100);
+                    led_flash(&robot_singleton.headlight);
+                }
+
+
+
                 break;
             case MOVE_CONTAINERS:
                 break;
