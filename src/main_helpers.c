@@ -69,6 +69,7 @@ void switch_pipeline(int new_pipeline) {
 
 void full_motor_init() {
     init_motor_resources();
+    init_all_encoders();
 
     robot_singleton.omniMotors = malloc(sizeof(motor_t) * 4);
 
@@ -104,7 +105,7 @@ void full_motor_init() {
     dc_set_speed(&robot_singleton.outtakeMotor, 0);
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
     servo_set_angle(&robot_singleton.armMotor, 60);
-    outtake_reset(&robot_singleton.outtakeMotor);
+    // outtake_reset(&robot_singleton.outtakeMotor);
 }
 
 void aprilTag_main(int desired_fid, double ta_target) {

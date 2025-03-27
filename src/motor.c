@@ -12,8 +12,7 @@
  */
 
 #include "motor.h"
-#include "encoder.h"  // Include encoder header for reading encoder values
-#include "pid.h"      // Include PID header for PID control
+
 
 #include "esp_log.h"
 
@@ -353,7 +352,7 @@ void move_pid_time(motor_t *motors, maneuver_t maneuver, float speed_scalar, dou
     }
 
     // Initialize encoder
-    init_all_encoders();
+    // init_all_encoders();
     
     // Initialize PID controllers for each motor (angle-based)
     PIDController pid_fr, pid_fl, pid_br, pid_bl;

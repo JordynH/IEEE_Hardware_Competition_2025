@@ -118,7 +118,7 @@ void spi_secondary_task(void *arg) {
         //
         //
         //
-        ret = spi_slave_transmit(SPI2_HOST, &transaction, portMAX_DELAY);
+        ret = spi_slave_transmit(SPI2_HOST, &transaction, pdMS_TO_TICKS(100));
         if (command_flag) {
             memset(send_buf, 0, sizeof(send_buf));
             memcpy(send_buf, "ACK", strlen("ACK"));
@@ -205,7 +205,7 @@ void process_received_data(char *input) {
 
                 //cJSON_Delete(receivedJson);
             } else {
-                // ESP_LOGI(TAG, "Valid JSON received");
+                ESP_LOGI(TAG, "Valid JSON received");
                 if(xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
                     if(receivedData.jsonInput != NULL) {
                         cJSON_Delete(receivedData.jsonInput);
@@ -216,7 +216,7 @@ void process_received_data(char *input) {
                 } else {
                     cJSON_Delete(receivedJson);
                 }
-                // ESP_LOGI(TAG, "no fun or games");
+                ESP_LOGI(TAG, "no fun or games");
                 // if (get_v()) {
                 //     if (get_pID() == 1) {
                 //         update_ema(&purple_object_ema);
@@ -250,7 +250,7 @@ void process_received_data(char *input) {
             // ESP_LOGI(TAG, "message: %s", get_message());
             break;
     }
-    // ESP_LOGI(TAG, "ah ha");
+    ESP_LOGI(TAG, "ah ha");
 }
 
 void send_message(char *message) {

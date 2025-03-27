@@ -19,7 +19,8 @@
  #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-
+#include "encoder.h"  // Include encoder header for reading encoder values
+#include "pid.h"      // Include PID header for PID control
  
  /**
   * @brief Enumeration for the different motor types
