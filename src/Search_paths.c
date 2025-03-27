@@ -162,3 +162,59 @@ void Outside_Cave_Part_3() {
     // CenterBetweenStartBoxAndRendezvousPad();
     // AdjustMovementBasedOnWestAprilTag();
 }
+
+void Short_Search_All() {
+
+    // dc_set_speed(&robot_singleton.intakeMotor, -75);
+
+    // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.35);
+
+    // move_pid_time(robot_singleton.omniMotors, RIGHT, 15, 1.25);
+
+    // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 3.15);
+
+    // move_pid_time(robot_singleton.omniMotors, LEFT, 15, 2.75);
+
+    // move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.75);
+
+    // move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 2.75);
+
+    // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.25);
+
+    // move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 2.25);
+
+    // move_pid_time(robot_singleton.omniMotors, LEFT, 15, 1.25);
+
+    // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.75);
+
+    // move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.75);
+
+    // move_pid_time(robot_singleton.omniMotors, LEFT, 15, 1.25);
+
+    // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.75);
+
+    // perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 22);
+
+    // dump_in_geo();
+
+    // move_pid_time(robot_singleton.omniMotors, LEFT, 15, 0.5);
+    // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.75);
+    // move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
+
+    // // aprilTag_main(-1, 0.08);
+
+    // Inside_Cave();
+
+    // dc_set_speed(&robot_singleton.intakeMotor, 0);
+
+
+
+    while (1) {
+        move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.5);
+
+        vTaskDelay(500);
+
+        move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 2.5);
+        
+    }
+}

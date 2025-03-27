@@ -17,5 +17,8 @@ void Outside_Cave_Part_2();
 // Re-sweep outside the cave, dump, and move geodinium bin
 void Outside_Cave_Part_3();
 
+// less than 1.5 minute predetermined path
+void Short_Search_All();
+
 
 #endif // SEARCH_PATHS_H
