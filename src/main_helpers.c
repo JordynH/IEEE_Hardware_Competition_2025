@@ -39,7 +39,7 @@ int setup() {
     //vTaskDelay(pdMS_TO_TICKS(500));
     
     // ESP_LOGI(TAG, "Waiting for Pipeline Switch");
-    switch_pipeline(1);
+    switch_pipeline(6);
     
     
     led_flash(&robot_singleton.headlight);
@@ -104,10 +104,10 @@ void full_motor_init() {
 }
 
 void aprilTag_main(int desired_fid, double ta_target) {
-    switch_pipeline(6);
+    // switch_pipeline(6);
     int done = 0;
 
-    double dy_threshold = 2;
+    double dy_threshold = 3;
     double tx_threshold = 3;
     double tx_epsilon = 10;
     double ta_epsilon = 0.01;
@@ -411,6 +411,6 @@ void dump_in_geo() {
     move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 1.75);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.85);
     outtake_dump(&robot_singleton.outtakeMotor);
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(800));
     outtake_reset(&robot_singleton.outtakeMotor);
 }

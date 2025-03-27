@@ -31,8 +31,11 @@ int app_main() {
         esp_restart();
     }
 
-    
     Outside_Cave_Part_1();
+
+    Inside_Cave();
+
+    Outside_Cave_Part_2();
 
     // dc_set_speed(&robot_singleton.intakeMotor, -80);
     // perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);

@@ -251,7 +251,7 @@ void outtake_dump(motor_t *outtakeMotor) {
     int64_t start_time = esp_timer_get_time();
     int64_t elapsed_time = 0;
     dc_set_speed(outtakeMotor, 25);
-    while (elapsed_time < (5250000)) {
+    while (elapsed_time < (5350000)) {
         elapsed_time = esp_timer_get_time() - start_time;
         vTaskDelay(pdMS_TO_TICKS(100));
     }
@@ -262,7 +262,7 @@ void outtake_reset(motor_t *outtakeMotor) {
     int64_t start_time = esp_timer_get_time();
     int64_t elapsed_time = 0;
     dc_set_speed(outtakeMotor, -25);
-    while (elapsed_time < (4900000)) {
+    while (elapsed_time < (4850000)) {
         elapsed_time = esp_timer_get_time() - start_time;
         vTaskDelay(pdMS_TO_TICKS(100));
     }
