@@ -21,6 +21,10 @@ int64_t start_time_us;
 */
 
 int app_main() {
+    esp_reset_reason_t resetReason = esp_reset_reason();
+    ESP_LOGI(TAG, "Reset reason (code): %d", resetReason);
+    
+    esp_log_level_set("*", ESP_LOG_DEBUG);
     if (setup() != 0) {
         for (int jordyn = 0; jordyn < 7; ++jordyn) {
             led_flash(&robot_singleton.headlight);
@@ -31,6 +35,7 @@ int app_main() {
         esp_restart();
     }
 
+    // outtake_dump(&robot_singleton.outtakeMotor);
     // ESP_LOGI("MAIN", "got here");
     // while (1) {
     //     vTaskDelay(100);
@@ -54,7 +59,7 @@ int app_main() {
                 currentState = FULL_SEARCH;
                 break;
             case START_LED_SENSE:
-                wait_for_start_led();
+                // wait_for_start_led();
                 currentState = FULL_SEARCH;
                 break;
             case FULL_SEARCH:

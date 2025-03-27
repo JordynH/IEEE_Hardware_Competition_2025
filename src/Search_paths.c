@@ -13,13 +13,14 @@ void Outside_Cave_Part_1() {
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.5);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.6);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.55);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.65);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.5);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.9);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.85);
 
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.85);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.0);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.85);
+
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.5);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.85);
     perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 22);
 
     dump_in_geo();

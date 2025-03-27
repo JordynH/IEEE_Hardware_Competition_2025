@@ -17,7 +17,7 @@ int setup() {
     /* 2. Push Button, Limit Switch, LED Start Initialization */
     setup_limit_switch();
     setup_push_start();
-    setup_start_led();
+    // setup_start_led();
 
     /* 3. Motor Initialization Sequence */
     full_motor_init();
@@ -415,27 +415,27 @@ void dump_in_geo() {
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
     move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 1.75);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.85);
-    outtake_dump(&robot_singleton.outtakeMotor);
+    // outtake_dump(&robot_singleton.outtakeMotor);
     vTaskDelay(pdMS_TO_TICKS(800));
-    outtake_reset(&robot_singleton.outtakeMotor);
+    // outtake_reset(&robot_singleton.outtakeMotor);
 }
 
-void setup_start_led() {
-    gpio_config_t io_conf = {
-        .intr_type = GPIO_INTR_DISABLE,      // disable interrupts
-        .mode = GPIO_MODE_INPUT,             // set as input mode
-        .pin_bit_mask = (1ULL << GPIO_NUM_14),    // bit mask for WAIT_PIN
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .pull_up_en   = GPIO_PULLUP_DISABLE
-    };
-    gpio_config(&io_conf);
-}
+// void setup_start_led() {
+//     gpio_config_t io_conf = {
+//         .intr_type = GPIO_INTR_DISABLE,      // disable interrupts
+//         .mode = GPIO_MODE_INPUT,             // set as input mode
+//         .pin_bit_mask = (1ULL << GPIO_NUM_14),    // bit mask for WAIT_PIN
+//         .pull_down_en = GPIO_PULLDOWN_DISABLE,
+//         .pull_up_en   = GPIO_PULLUP_DISABLE
+//     };
+//     gpio_config(&io_conf);
+// }
 
 void setup_limit_switch() {
     gpio_config_t io_conf = {
         .intr_type = GPIO_INTR_DISABLE,      // disable interrupts
         .mode = GPIO_MODE_INPUT,             // set as input mode
-        .pin_bit_mask = (1ULL << GPIO_NUM_12),    // bit mask for WAIT_PIN
+        .pin_bit_mask = (1ULL << GPIO_NUM_14),    // bit mask for WAIT_PIN
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .pull_up_en   = GPIO_PULLUP_ENABLE
     };
@@ -457,7 +457,7 @@ void setup_push_start()
 void wait_for_start_led()
 {
     ESP_LOGI(TAG, "Waiting for LED sense to go HIGH...");
-    while (gpio_get_level(GPIO_NUM_14) == 0) {
+    while (gpio_get_level(GPIO_NUM_12) == 0) {
         vTaskDelay(pdMS_TO_TICKS(10));  // Delay to avoid busy looping
     }
     ESP_LOGI(TAG, "LED sense is HIGH");

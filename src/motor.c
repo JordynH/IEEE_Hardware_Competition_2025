@@ -261,9 +261,11 @@ void outtake_dump(motor_t *outtakeMotor) {
 void outtake_reset(motor_t *outtakeMotor) {
     dc_set_speed(outtakeMotor, -25);
     // Wait until the limit switch is triggered (i.e., digital reading goes low).
-    while (gpio_get_level(GPIO_NUM_12) != 0) {
+    while (gpio_get_level(GPIO_NUM_14) != 0) {
+        ESP_LOGI(TAG, "lowering the buck, %d", gpio_get_level(GPIO_NUM_14));
         vTaskDelay(pdMS_TO_TICKS(100));
     }
+    ESP_LOGI(TAG, "lowered, %d", gpio_get_level(GPIO_NUM_14));
     // dc_set_speed(outtakeMotor, 10);
     // while (gpio_get_level(GPIO_NUM_12) == 0) {
     //     vTaskDelay(pdMS_TO_TICKS(100));

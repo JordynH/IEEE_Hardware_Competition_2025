@@ -74,7 +74,7 @@ void dump_in_geo();
 void setup_limit_switch();
 void setup_push_start();
 void setup_start_led();
-void wait_for_start_led();
+// void wait_for_start_led();
 void wait_for_push_start();
 
 
