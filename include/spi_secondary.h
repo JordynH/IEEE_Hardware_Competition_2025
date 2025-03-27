@@ -57,6 +57,8 @@ typedef struct {
 
 } EMAState;
 
+void monitor_stack_usage();
+
 // Function to initialize the SPI secondary stage
 esp_err_t spi_secondary_init(void);
 

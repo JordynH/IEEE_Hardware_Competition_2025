@@ -31,7 +31,7 @@ void Outside_Cave_Part_1() {
 
     aprilTag_main(-1, 0.08);
 
-    move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.9);
 
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
     
@@ -40,7 +40,7 @@ void Outside_Cave_Part_1() {
 
 // Inside the Cave: Sweep for Astral Material
 void Inside_Cave() {
-    led_set_brightness(NULL, 75);
+    // led_set_brightness(NULL, 75);
 
     // Initial forward move.
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.2);

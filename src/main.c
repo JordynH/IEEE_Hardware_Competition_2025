@@ -24,7 +24,7 @@ int app_main() {
     esp_reset_reason_t resetReason = esp_reset_reason();
     ESP_LOGI(TAG, "Reset reason (code): %d", resetReason);
     
-    esp_log_level_set("*", ESP_LOG_DEBUG);
+    esp_log_level_set("*", ESP_LOG_VERBOSE);
     if (setup() != 0) {
         for (int jordyn = 0; jordyn < 7; ++jordyn) {
             led_flash(&robot_singleton.headlight);

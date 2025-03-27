@@ -88,7 +88,6 @@ void full_motor_init() {
     motor_control_init(&outtakeMotor);
     motor_control_init(&armMotor);
 
-    robot_singleton.armMotor = armMotor;
     robot_singleton.frontLeft = frontLeft;
     robot_singleton.frontRight = frontRight;
     robot_singleton.backLeft = backLeft;

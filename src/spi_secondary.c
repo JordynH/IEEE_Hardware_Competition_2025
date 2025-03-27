@@ -28,6 +28,12 @@ EMAState april_tag_ema;
 EMAState line_following_ema;
 SemaphoreHandle_t data_mutex;
 
+void monitor_stack_usage() {
+    // Get the current stack high-water mark for the task
+    UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(NULL);  // NULL for current task
+
+    printf("High water mark (remaining stack): %u words\n", highWaterMark);
+}
 
 esp_err_t spi_secondary_init(void) {
     data_mutex = xSemaphoreCreateMutex();
@@ -160,7 +166,7 @@ void process_received_data(char *input) {
         return;
     }
     ESP_LOGI(TAG, "HEAP: %u", (unsigned int)esp_get_free_heap_size());
-    ESP_LOGI(TAG, "is this a thing or no: ");
+    // ESP_LOGI(TAG, "is this a thing or no: ");
     char message_type = input[0];
 
     // size_t len = strlen(input + 1);
@@ -199,7 +205,7 @@ void process_received_data(char *input) {
 
                 //cJSON_Delete(receivedJson);
             } else {
-                ESP_LOGI(TAG, "Valid JSON received");
+                // ESP_LOGI(TAG, "Valid JSON received");
                 if(xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
                     if(receivedData.jsonInput != NULL) {
                         cJSON_Delete(receivedData.jsonInput);
@@ -210,7 +216,7 @@ void process_received_data(char *input) {
                 } else {
                     cJSON_Delete(receivedJson);
                 }
-                ESP_LOGI(TAG, "no fun or games");
+                // ESP_LOGI(TAG, "no fun or games");
                 // if (get_v()) {
                 //     if (get_pID() == 1) {
                 //         update_ema(&purple_object_ema);
@@ -232,6 +238,7 @@ void process_received_data(char *input) {
                 // double ta_value = get_ema_ta(&purple_object_ema);
                 // ESP_LOGI(TAG, "Current TA EMA: %f", ta_value);
             }
+            monitor_stack_usage();
             
             break;
         case 'M':
@@ -243,7 +250,7 @@ void process_received_data(char *input) {
             // ESP_LOGI(TAG, "message: %s", get_message());
             break;
     }
-    ESP_LOGI(TAG, "ah ha");
+    // ESP_LOGI(TAG, "ah ha");
 }
 
 void send_message(char *message) {
