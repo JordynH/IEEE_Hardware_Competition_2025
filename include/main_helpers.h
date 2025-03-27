@@ -30,6 +30,7 @@ typedef enum {
     RESET,              // Restart the ESP and run the initialization sequence again
     READY,              // Do nothing and wait for further instructions
     START_LED_SENSE,    // Wait for the start LED at the beginning of the competition
+    FULL_SEARCH,        // Do the thing
     MOVE_CONTAINERS,    // Move the cosmic shipping containers into their correct launch pads
     COLLECT_OUTSIDE,    // Roam around and collect the asteroids outside of the cave
     COLLECT_INSIDE,     // Roam around and collect the asteroids inside of the cave
@@ -69,5 +70,13 @@ void demo();
 void power_test_sequence();
 
 void dump_in_geo();
+
+void setup_limit_switch();
+void setup_push_start();
+void setup_start_led();
+void wait_for_start_led();
+void wait_for_push_start();
+
+
 
 #endif // MAIN_HELPERS_H

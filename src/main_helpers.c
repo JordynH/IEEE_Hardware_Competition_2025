@@ -7,15 +7,19 @@
 robot_t robot_singleton;
 
 int setup() {
-    /* 1. LED Initializatio Sequence */
-
+    /* 1. LED Initialization Sequence */
     led_init(&robot_singleton.headlight);
     led_set_brightness(&robot_singleton.headlight, 50);
 
     led_flash(&robot_singleton.headlight);
     vTaskDelay(pdMS_TO_TICKS(500));
 
-    /* 2. Motor Initialization Sequence */
+    /* 2. Push Button, Limit Switch, LED Start Initialization */
+    setup_limit_switch();
+    setup_push_start();
+    setup_start_led();
+
+    /* 3. Motor Initialization Sequence */
     full_motor_init();
 
     led_flash(&robot_singleton.headlight);
@@ -23,23 +27,23 @@ int setup() {
     vTaskDelay(pdMS_TO_TICKS(500));
 
 
-    /* 3. RPI SPI Communication Initialization Sequence */
+    /* 4. RPI SPI Communication Initialization Sequence */
     spi_secondary_init();
     
-    char* received = "";
-    ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
-    while(get_pID() < 0 && (strcmp(received, "INITIALIZATION_MESSAGE"))) {
-        send_message("INITIALIZATION_MESSAGE");
-        // ESP_LOGI(TAG, "message = %s", get_message());
-        received = get_message();
-        vTaskDelay(pdMS_TO_TICKS(5));
-    }
-    ESP_LOGI(TAG, "communication established");
-    send_message("communication established");
-    //vTaskDelay(pdMS_TO_TICKS(500));
+    // char* received = "";
+    // ESP_LOGI(TAG, "Waiting for Communication Initialization Confirmation");
+    // while(get_pID() < 0 && (strcmp(received, "INITIALIZATION_MESSAGE"))) {
+    //     send_message("INITIALIZATION_MESSAGE");
+    //     // ESP_LOGI(TAG, "message = %s", get_message());
+    //     received = get_message();
+    //     vTaskDelay(pdMS_TO_TICKS(5));
+    // }
+    // ESP_LOGI(TAG, "communication established");
+    // send_message("communication established");
+    // //vTaskDelay(pdMS_TO_TICKS(500));
     
-    // ESP_LOGI(TAG, "Waiting for Pipeline Switch");
-    switch_pipeline(6);
+    // // ESP_LOGI(TAG, "Waiting for Pipeline Switch");
+    // switch_pipeline(6);
     
     
     led_flash(&robot_singleton.headlight);
@@ -100,7 +104,8 @@ void full_motor_init() {
     dc_set_speed(&robot_singleton.intakeMotor, 0);
     dc_set_speed(&robot_singleton.outtakeMotor, 0);
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
-    servo_set_angle(&robot_singleton.armMotor, 60);
+    servo_set_angle(&robot_singleton.armMotor, 67);
+    outtake_reset(&robot_singleton.outtakeMotor);
 }
 
 void aprilTag_main(int desired_fid, double ta_target) {
@@ -413,4 +418,56 @@ void dump_in_geo() {
     outtake_dump(&robot_singleton.outtakeMotor);
     vTaskDelay(pdMS_TO_TICKS(800));
     outtake_reset(&robot_singleton.outtakeMotor);
+}
+
+void setup_start_led() {
+    gpio_config_t io_conf = {
+        .intr_type = GPIO_INTR_DISABLE,      // disable interrupts
+        .mode = GPIO_MODE_INPUT,             // set as input mode
+        .pin_bit_mask = (1ULL << GPIO_NUM_14),    // bit mask for WAIT_PIN
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .pull_up_en   = GPIO_PULLUP_DISABLE
+    };
+    gpio_config(&io_conf);
+}
+
+void setup_limit_switch() {
+    gpio_config_t io_conf = {
+        .intr_type = GPIO_INTR_DISABLE,      // disable interrupts
+        .mode = GPIO_MODE_INPUT,             // set as input mode
+        .pin_bit_mask = (1ULL << GPIO_NUM_12),    // bit mask for WAIT_PIN
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .pull_up_en   = GPIO_PULLUP_ENABLE
+    };
+    gpio_config(&io_conf);
+}
+
+void setup_push_start()
+{
+    gpio_config_t io_conf = {
+        .intr_type = GPIO_INTR_DISABLE,      // disable interrupts
+        .mode = GPIO_MODE_INPUT,             // set as input mode
+        .pin_bit_mask = (1ULL << GPIO_NUM_22),  // bit mask for INPUT_PIN2
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .pull_up_en   = GPIO_PULLUP_ENABLE     // enable internal pull-up
+    };
+    gpio_config(&io_conf);
+}
+
+void wait_for_start_led()
+{
+    ESP_LOGI(TAG, "Waiting for LED sense to go HIGH...");
+    while (gpio_get_level(GPIO_NUM_14) == 0) {
+        vTaskDelay(pdMS_TO_TICKS(10));  // Delay to avoid busy looping
+    }
+    ESP_LOGI(TAG, "LED sense is HIGH");
+}
+
+void wait_for_push_start()
+{
+    ESP_LOGI(TAG, "Waiting for push start to go LOW...");
+    while (gpio_get_level(GPIO_NUM_22) != 0) {
+        vTaskDelay(pdMS_TO_TICKS(50));  // Delay to avoid busy looping
+    }
+    ESP_LOGI(TAG, "Push start is LOW");
 }

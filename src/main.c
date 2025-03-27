@@ -30,42 +30,28 @@ int app_main() {
         vTaskDelay(200);
         esp_restart();
     }
+    vTaskDelay(200);
+    wait_for_push_start();
+    led_flash(&robot_singleton.headlight);
+    wait_for_start_led();
 
-    Outside_Cave_Part_1();
+    // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1);
+    // vTaskDelay(pdTICKS_TO_MS(100));
+    // perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
+    // outtake_dump(&robot_singleton.outtakeMotor);
+    // outtake_reset(&robot_singleton.outtakeMotor);
+    // vTaskDelay(pdTICKS_TO_MS(500));
+    // vTaskDelay(pdTICKS_TO_MS(500));
+    // vTaskDelay(pdTICKS_TO_MS(500));
+    // vTaskDelay(pdTICKS_TO_MS(500));
 
-    Inside_Cave();
 
-    Outside_Cave_Part_2();
 
-    // dc_set_speed(&robot_singleton.intakeMotor, -80);
-    // perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
-    // aprilTag_main(-1, 0.08);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 25);
-    // led_flash(&robot_singleton.headlight);
-    // perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 25);
-    // vTaskDelay(pdMS_TO_TICKS(200));
-    // perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 25);
-    // aprilTag_main(-1, 0.06);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
+    // Outside_Cave_Part_1();
+
+    // Inside_Cave();
+
+    // Outside_Cave_Part_2();
 
     ESP_LOGI("MAIN", "got here");
     while (1) {
@@ -89,20 +75,25 @@ int app_main() {
                 esp_restart();
                 break;
             case READY:
+                wait_for_push_start();
+                currentState = START_LED_SENSE;
                 break;
             case START_LED_SENSE:
-                send_message("P0");
-                while ((strcmp(get_message(), "led found"))) {
-                    vTaskDelay(10);
-                }
-                currentState = COLLECT_OUTSIDE;
-                start_time_us = esp_timer_get_time();
+                wait_for_start_led();
+                currentState = FULL_SEARCH;
+                break;
+            case FULL_SEARCH:
                 break;
             case MOVE_CONTAINERS:
+                break;
             case COLLECT_OUTSIDE:
+                break;
             case COLLECT_INSIDE:
+                break;
             case UNLOAD:
+                break;
             case SHIMMY:
+                break;
             case STOP_PROGRAM:
                 perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
                 dc_set_speed(&robot_singleton.intakeMotor, 0);
