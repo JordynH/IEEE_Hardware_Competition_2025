@@ -30,28 +30,15 @@ int app_main() {
         vTaskDelay(200);
         esp_restart();
     }
-    vTaskDelay(200);
     wait_for_push_start();
     led_flash(&robot_singleton.headlight);
     wait_for_start_led();
+    
+    Outside_Cave_Part_1();
 
-    // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1);
-    // vTaskDelay(pdTICKS_TO_MS(100));
-    // perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
-    // outtake_dump(&robot_singleton.outtakeMotor);
-    // outtake_reset(&robot_singleton.outtakeMotor);
-    // vTaskDelay(pdTICKS_TO_MS(500));
-    // vTaskDelay(pdTICKS_TO_MS(500));
-    // vTaskDelay(pdTICKS_TO_MS(500));
-    // vTaskDelay(pdTICKS_TO_MS(500));
+    Inside_Cave();
 
-
-
-    // Outside_Cave_Part_1();
-
-    // Inside_Cave();
-
-    // Outside_Cave_Part_2();
+    Outside_Cave_Part_2();
 
     ESP_LOGI("MAIN", "got here");
     while (1) {
@@ -59,10 +46,6 @@ int app_main() {
         led_flash(&robot_singleton.headlight);
     }
     
-    vTaskDelay(5000);
-    dc_set_speed(&robot_singleton.intakeMotor, 0);
-    dc_set_speed(&robot_singleton.outtakeMotor, 0);
-    perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
 
     state_t currentState;
     currentState = READY;       // Begin in LED SENSE mode
