@@ -50,7 +50,7 @@ void Outside_Cave_Part_1() {
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1);
 
 
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.5);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
     // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.5);
     perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 22);
 
@@ -94,8 +94,6 @@ void Outside_Cave_Part_1() {
 
     dump_in_geo();
 
-    // monitor_stack_usage();
-
     move_pid_time(robot_singleton.omniMotors, LEFT, 15, 0.5);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.75);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
@@ -106,7 +104,7 @@ void Outside_Cave_Part_1() {
 
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.7);
 
-    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.45);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.44);
     
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.8);
 }
@@ -170,7 +168,7 @@ void Inside_Cave() {
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
 
     // Advance to new AprilTag depth.
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.4);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.5);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.7);
 
     perform_maneuver(robot_singleton.omniMotors, BACKWARD, NULL, 22);
