@@ -430,6 +430,9 @@ double get_retro_typ() {
 
 cJSON* get_fiducial() {
     cJSON *fiducial = cJSON_GetObjectItem(get_last_json(), "Fiducial");
+    if (!fiducial) {
+        return NULL;
+    }
     return fiducial;
 }
 
@@ -471,14 +474,14 @@ void get_point_at_index(int index, double* ret) {
     if (!pts) return;
 
     // (Optional) Debug print the JSON. Remember to free the printed string.
-    char *jsonprint = cJSON_Print(pts);
-    // ESP_LOGI(TAG, "Fiducial Points JSON: %s", jsonprint);
-    free(jsonprint);
+    // char *jsonprint = cJSON_Print(pts);
+    // // ESP_LOGI(TAG, "Fiducial Points JSON: %s", jsonprint);
+    // free(jsonprint);
 
     // Check if the requested index is within bounds.
     int array_size = cJSON_GetArraySize(pts);
     if (index < 0 || index >= array_size) {
-        ESP_LOGW(TAG, "Index %d out of bounds (array size: %d)", index, array_size);
+        // ESP_LOGW(TAG, "Index %d out of bounds (array size: %d)", index, array_size);
         return;
     }
 
@@ -551,8 +554,10 @@ double get_fiducial_tx() {
         return 0.0;
     }
 
+    double txd = tx->valuedouble;
+    if (!txd) return 0.0;
     // ESP_LOGI(TAG, "Fiducial tx: %f", tx->valuedouble);
-    return tx->valuedouble;
+    return txd;
 }
 
 double get_fiducial_tx_nocross() {
@@ -696,7 +701,7 @@ char* get_pTYPE() {
 int get_v() {
     cJSON *v = cJSON_GetObjectItem(get_last_json(), "v");
     if (!v || !cJSON_IsNumber(v)) {
-        ESP_LOGW(TAG, "v not found or not a number");
+        // ESP_LOGW(TAG, "v not found or not a number");
         return 0;
     }
 

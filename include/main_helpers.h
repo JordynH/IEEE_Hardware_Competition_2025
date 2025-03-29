@@ -29,12 +29,7 @@ extern robot_t robot_singleton;
 typedef enum {
     RESET,              // Restart the ESP and run the initialization sequence again
     READY,              // Do nothing and wait for further instructions
-    START_LED_SENSE,    // Wait for the start LED at the beginning of the competition
     FULL_SEARCH,        // Do the thing
-    MOVE_CONTAINERS,    // Move the cosmic shipping containers into their correct launch pads
-    COLLECT_OUTSIDE,    // Roam around and collect the asteroids outside of the cave
-    COLLECT_INSIDE,     // Roam around and collect the asteroids inside of the cave
-    UNLOAD,             // Unload the collected asteroids into the cosmic shipping containers
     SHIMMY,             // Celebratory shimmy
     STOP_PROGRAM,       // Stop, drop, and roll (except don't drop or roll, just stop) exit the FSM
     END

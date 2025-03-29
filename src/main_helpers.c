@@ -155,7 +155,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
             // --- STRAFE until centered ---
             while (fabs(tx) > tx_threshold) {
                 // ESP_LOGI(TAG, "7");
-                monitor_stack_usage();
+                // monitor_stack_usage();
                 ta_temp = get_fiducial_ta();
                 if (ta_temp > 0.00001) {
                     ta = ta_temp;
@@ -188,9 +188,9 @@ void aprilTag_main(int desired_fid, double ta_target) {
             
             //&& (fabs(tx) < tx_epsilon)
             if ((dy < (-1 * dy_threshold)) && (fabs(tx) < tx_epsilon)) {
-                perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 18);
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 16);
             } else if ((dy > dy_threshold) && (fabs(tx) < tx_epsilon)) {
-                perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 18);
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 16);
             }
 
             // Rotate while BOTH:
@@ -252,7 +252,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
         ta = 0.0;
         ta_temp = 0.0;
         while (!distance_done) {
-            monitor_stack_usage();
+            // monitor_stack_usage();
 
             ta_temp = get_fiducial_ta();
             if (ta_temp > 0.00001) {
@@ -298,7 +298,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
     }
 
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0); // HERE
-    monitor_stack_usage();
+    // monitor_stack_usage();
 }
 
 
@@ -425,7 +425,7 @@ void power_test_sequence() {
 }
 
 void dump_in_geo() {
-    monitor_stack_usage();
+    // monitor_stack_usage();
     aprilTag_main(-1, 0.07);
     // move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.5);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);

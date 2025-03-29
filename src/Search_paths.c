@@ -28,7 +28,7 @@ void Outside_Cave_Part_1() {
 
     dump_in_geo();
 
-    monitor_stack_usage();
+    // monitor_stack_usage();
 
     move_pid_time(robot_singleton.omniMotors, LEFT, 15, 0.5);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.75);
@@ -40,7 +40,7 @@ void Outside_Cave_Part_1() {
 
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.9);
 
-    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
     
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.8);
 }
@@ -51,7 +51,7 @@ void Inside_Cave() {
 
     // Initial forward move.
     // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.2);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.5);
     perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 22);
     aprilTag_main(-1, 0.08);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1);
@@ -59,12 +59,12 @@ void Inside_Cave() {
     // --- First outer loop iteration ---
     // Inner loop, d == 0:
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.8);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.42);
 
     // Inner loop, d == 1
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.42);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
@@ -75,12 +75,12 @@ void Inside_Cave() {
     // --- Second outer loop iteration ---
     // Inner loop, d == 0:
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.8);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.42);
 
     // Inner loop, d == 1:
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.42);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
@@ -91,12 +91,12 @@ void Inside_Cave() {
     // --- Third outer loop iteration ---
     // Inner loop, d == 0:
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.8);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.42);
 
     // Inner loop, d == 1:
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.42);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
@@ -120,7 +120,7 @@ void Inside_Cave() {
     // move_pid_time(robot_singleton.omniMotors, LEFT, 15, 3);
 
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.4);
-    move_pid_time(robot_singleton.omniMotors, RIGHT, 15, 2);
+    move_pid_time(robot_singleton.omniMotors, RIGHT, 15, 3);
 
     led_set_brightness(NULL, 50);
 
@@ -128,17 +128,104 @@ void Inside_Cave() {
 
 // Outside the Cave - Part 2: Dump Geodinium and Move Nebulite Bin
 void Outside_Cave_Part_2() {
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.5);
 
-    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 2.75);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.6);
 
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.5);
-
+    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 22);
     dump_in_geo();
+
+
 }
 
 // Outside the Cave - Part 3: Re-sweep, Dump, and Move Geodinium Bin
 void Outside_Cave_Part_3() {
+
+    move_pid_time(robot_singleton.omniMotors, LEFT, 15, 0.5);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.75);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.5);
+
+    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 22);
+    
+    aprilTag_main(-1, 0.08);
+
+    move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 0.5);                 /* move away from the bucket */
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);      /* spin 90° */
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);      /* spin 90° */
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 2);                /* back into the wall */
+    move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 0.5);                  /* strafe into the bucket */
+
+    servo_set_angle(&robot_singleton.intakeMotor, 150);                         /* lower the arm to grab the bucket */
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 10, 1.8);                /* move to the center of the arena */
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 10, 2);  /* rotate to face west */
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 10, 4);
+
+    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 22);
+
+    aprilTag_main(-1, 0.10);
+    int fid = get_fiducial_fID();
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 10, 2);  /* rotate to face south */
+    if (fid < 2) {
+        move_pid_time(robot_singleton.omniMotors, FORWARD, 10, 1); // TUNE time
+        move_pid_time(robot_singleton.omniMotors, RIGHT, 10, 1);
+        servo_set_angle(&robot_singleton.armMotor, 60);
+        move_pid_time(robot_singleton.omniMotors, LEFT, 10, 1);
+        move_pid_time(robot_singleton.omniMotors, BACKWARD, 10, 1); // TUNE time
+    } else if (fid > 2) {
+        move_pid_time(robot_singleton.omniMotors, BACKWARD, 10, 1); // TUNE time
+        move_pid_time(robot_singleton.omniMotors, RIGHT, 10, 1);
+        servo_set_angle(&robot_singleton.armMotor, 60);
+        move_pid_time(robot_singleton.omniMotors, LEFT, 10, 1);
+        move_pid_time(robot_singleton.omniMotors, FORWARD, 10, 1);
+    } else {
+        move_pid_time(robot_singleton.omniMotors, RIGHT, 10, 1);
+        servo_set_angle(&robot_singleton.armMotor, 60);
+        move_pid_time(robot_singleton.omniMotors, LEFT, 10, 1);
+    }
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.42);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.7);
+
+    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 22);
+
+    aprilTag_main(-1, 0.08);
+
+    move_pid_time(robot_singleton.omniMotors, RIGHT, 15, 0.5);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.8);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 10, 0.75);
+
+    move_pid_time(robot_singleton.omniMotors, RIGHT, 15, 0.75);      // TUNE
+    servo_set_angle(&robot_singleton.armMotor, 150);
+
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 10, 1.5);
+
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 10, 2);
+
+    perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, 15);
+
+    aprilTag_main(-1, 0.10);
+    fid = get_fiducial_fID();
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 10, 2);  /* rotate to face south */
+    if (fid < 2) {
+        move_pid_time(robot_singleton.omniMotors, FORWARD, 10, 1); // TUNE time
+        move_pid_time(robot_singleton.omniMotors, RIGHT, 10, 1);
+        servo_set_angle(&robot_singleton.armMotor, 60);
+        move_pid_time(robot_singleton.omniMotors, LEFT, 10, 1);
+        move_pid_time(robot_singleton.omniMotors, BACKWARD, 10, 1); // TUNE time
+    } else if (fid > 2) {
+        move_pid_time(robot_singleton.omniMotors, BACKWARD, 10, 1); // TUNE time
+        move_pid_time(robot_singleton.omniMotors, RIGHT, 10, 1);
+        servo_set_angle(&robot_singleton.armMotor, 60);
+        move_pid_time(robot_singleton.omniMotors, LEFT, 10, 1);
+        move_pid_time(robot_singleton.omniMotors, FORWARD, 10, 1);
+    } else {
+        move_pid_time(robot_singleton.omniMotors, RIGHT, 10, 1);
+        servo_set_angle(&robot_singleton.armMotor, 60);
+        move_pid_time(robot_singleton.omniMotors, LEFT, 10, 1);
+    }
+    
+
     // Prepare for dump alignment
     // RotateRight(90);
     // SlideLeftUntilSouthAprilTagInView();

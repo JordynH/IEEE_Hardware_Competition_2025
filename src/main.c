@@ -66,10 +66,6 @@ int app_main() {
                 // currentState = START_LED_SENSE;
                 currentState = FULL_SEARCH;
                 break;
-            case START_LED_SENSE:
-                // wait_for_start_led();
-                currentState = FULL_SEARCH;
-                break;
             case FULL_SEARCH:
 
                 // Short_Search_All();  
@@ -80,24 +76,36 @@ int app_main() {
             
                 Outside_Cave_Part_2();
 
+                Outside_Cave_Part_3();
 
-                while (1) {
-                    vTaskDelay(100);
-                    led_flash(&robot_singleton.headlight);
-                }
+                currentState = SHIMMY;
 
-
-
-                break;
-            case MOVE_CONTAINERS:
-                break;
-            case COLLECT_OUTSIDE:
-                break;
-            case COLLECT_INSIDE:
-                break;
-            case UNLOAD:
+                
                 break;
             case SHIMMY:
+                dc_set_speed(&robot_singleton.intakeMotor, 0);
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_CLOCKWISE, NULL, 20);
+                for (int i = 0; i < 10; ++i) {
+                    if (i % 2 == 0) {
+                        servo_set_angle(&robot_singleton.armMotor, 150);
+                    } else {
+                        servo_set_angle(&robot_singleton.armMotor, 60);
+                    }
+                    vTaskDelay(pdMS_TO_TICKS(500));
+                }
+
+                perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 20);
+                for (int i = 0; i < 10; ++i) {
+                    if (i % 2 == 0) {
+                        servo_set_angle(&robot_singleton.armMotor, 150);
+                    } else {
+                        servo_set_angle(&robot_singleton.armMotor, 60);
+                    }
+                    vTaskDelay(pdMS_TO_TICKS(500));
+                }
+
+                currentState = END;
+
                 break;
             case STOP_PROGRAM:
                 perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
