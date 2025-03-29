@@ -9,14 +9,14 @@ double TA_CLOSE = 0.12;
 void Outside_Cave_Part_1() {
     dc_set_speed(&robot_singleton.intakeMotor, -75);
 
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.25);
-    move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.8);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.65);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.3);
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.42);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.5);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.25);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.35);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.9);
     move_pid_time(robot_singleton.omniMotors, LEFT, 10, 1.4);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.4);
     move_pid_time(robot_singleton.omniMotors, RIGHT, 10, 1.4);
@@ -24,7 +24,7 @@ void Outside_Cave_Part_1() {
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.85);
 
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.5);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.85);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.70);
     perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 22);
 
 
@@ -60,8 +60,10 @@ void Inside_Cave() {
     // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.2);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.5);
     perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 22);
-    aprilTag_main(-1, 0.08);
-    move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1);
+
+    aprilTag_main(-1, 0.07);
+
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.85);
 
     // --- First outer loop iteration ---
     // Inner loop, d == 0:
