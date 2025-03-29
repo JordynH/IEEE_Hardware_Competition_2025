@@ -127,7 +127,7 @@ void Inside_Cave() {
     // move_pid_time(robot_singleton.omniMotors, LEFT, 15, 3);
 
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.4);
-    move_pid_time(robot_singleton.omniMotors, BACKWARD, 10, 0.5);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 10, 0.35);
     move_pid_time(robot_singleton.omniMotors, RIGHT, 15, 4);
 
     led_set_brightness(NULL, 50);
