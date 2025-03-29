@@ -15,7 +15,10 @@ void Outside_Cave_Part_1() {
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.25);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.85);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2);
+    move_pid_time(robot_singleton.omniMotors, LEFT, 10, 1.4);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, RIGHT, 10, 1.4);
 
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.85);
 
@@ -47,7 +50,11 @@ void Inside_Cave() {
     // led_set_brightness(NULL, 75);
 
     // Initial forward move.
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.2);
+    // move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.2);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.5);
+    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 22);
+    aprilTag_main(-1, 0.08);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.3);
 
     // --- First outer loop iteration ---
     // Inner loop, d == 0:

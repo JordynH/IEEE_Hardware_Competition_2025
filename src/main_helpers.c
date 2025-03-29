@@ -113,7 +113,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
     // ESP_LOGI(TAG, "1111111111");
     int done = 0;
 
-    double dy_threshold = 5;
+    double dy_threshold = 4;
     double tx_threshold = 3;
     double tx_epsilon = 10;
     double ta_epsilon = 0.01;
@@ -426,16 +426,16 @@ void power_test_sequence() {
 
 void dump_in_geo() {
     monitor_stack_usage();
-    aprilTag_main(-1, 0.05);
+    aprilTag_main(-1, 0.07);
     // move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.5);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
     move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 1.75);
-    move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.85);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.95);
     dc_set_speed(&robot_singleton.intakeMotor, 0);
     outtake_dump(&robot_singleton.outtakeMotor);
-    dc_set_speed(&robot_singleton.intakeMotor, -75);
-    vTaskDelay(pdMS_TO_TICKS(800));
+    vTaskDelay(pdMS_TO_TICKS(800));    
     outtake_reset(&robot_singleton.outtakeMotor);
+    dc_set_speed(&robot_singleton.intakeMotor, -75);
 }
 
 // void setup_start_led() {
