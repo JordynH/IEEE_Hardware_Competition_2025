@@ -57,13 +57,13 @@ void switch_pipeline(int new_pipeline) {
     char message[5];
     sprintf(message, "P%d", new_pipeline);
     send_message(message);
-    led_flash(&robot_singleton.headlight);
+    // led_flash(&robot_singleton.headlight);
     while (get_pID() != (double)new_pipeline) {
         send_message(message);
         vTaskDelay(5);
     }
-    led_flash(&robot_singleton.headlight);
-    led_flash(&robot_singleton.headlight);
+    // led_flash(&robot_singleton.headlight);
+    // led_flash(&robot_singleton.headlight);
 
 }
 
@@ -104,7 +104,7 @@ void full_motor_init() {
     dc_set_speed(&robot_singleton.intakeMotor, 0);
     dc_set_speed(&robot_singleton.outtakeMotor, 0);
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
-    servo_set_angle(&robot_singleton.armMotor, 60);
+    servo_set_angle(&robot_singleton.armMotor, 240);
     outtake_reset(&robot_singleton.outtakeMotor);
 }
 
@@ -130,7 +130,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
         while (get_v() == 0) { // FIXME: Check accuracy of hard-coded path and potentially 
                             // make this a while loop with a maneuver.
 
-            led_flash(&robot_singleton.headlight);
+            // led_flash(&robot_singleton.headlight);
             vTaskDelay(pdMS_TO_TICKS(20));
             // ESP_LOGI(TAG, "4");
         }
@@ -426,11 +426,11 @@ void power_test_sequence() {
 
 void dump_in_geo() {
     // monitor_stack_usage();
-    aprilTag_main(-1, 0.07);
+    aprilTag_main(-1, 0.06);
     // move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.5);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
-    move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 1.75);
-    move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.95);
+    move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 1.65);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 1.35);
     dc_set_speed(&robot_singleton.intakeMotor, 0);
     outtake_dump(&robot_singleton.outtakeMotor);
     vTaskDelay(pdMS_TO_TICKS(800));    

@@ -104,14 +104,15 @@ int app_main() {
                     vTaskDelay(pdMS_TO_TICKS(500));
                 }
 
-                currentState = END;
+                currentState = STOP_PROGRAM;
 
                 break;
             case STOP_PROGRAM:
                 perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
                 dc_set_speed(&robot_singleton.intakeMotor, 0);
                 dc_set_speed(&robot_singleton.outtakeMotor, 0);
-                servo_set_angle(&robot_singleton.armMotor, 90);
+                servo_set_angle(&robot_singleton.armMotor, 240);
+                led_set_brightness(&robot_singleton.headlight, 0);
                 currentState = END;
                 break;
             case END:
