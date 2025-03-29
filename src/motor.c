@@ -247,10 +247,12 @@ void perform_maneuver(motor_t *motors, maneuver_t maneuver, float speeds[4], flo
 }
 
 void outtake_dump(motor_t *outtakeMotor) {
+    
     int64_t start_time = esp_timer_get_time();
     int64_t elapsed_time = 0;
+    int64_t end_time = 3250000;
     dc_set_speed(outtakeMotor, 35);
-    while (elapsed_time < (5350000 * 0.85)) {
+    while (elapsed_time < (end_time)) {
         elapsed_time = esp_timer_get_time() - start_time;
         vTaskDelay(pdMS_TO_TICKS(100));
     }
@@ -261,7 +263,7 @@ void outtake_reset(motor_t *outtakeMotor) {
     dc_set_speed(outtakeMotor, -25);
     // Wait until the limit switch is triggered (i.e., digital reading goes low).
     while (gpio_get_level(GPIO_NUM_14) != 0) {
-        ESP_LOGI(TAG, "lowering the buck, %d", gpio_get_level(GPIO_NUM_14));
+        // ESP_LOGI(TAG, "lowering the buck, %d", gpio_get_level(GPIO_NUM_14));
         vTaskDelay(pdMS_TO_TICKS(100));
     }
     ESP_LOGI(TAG, "lowered, %d", gpio_get_level(GPIO_NUM_14));

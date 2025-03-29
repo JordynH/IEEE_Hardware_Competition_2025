@@ -72,13 +72,13 @@ int app_main() {
                 break;
             case FULL_SEARCH:
 
-                Short_Search_All();  
+                // Short_Search_All();  
 
-                // Outside_Cave_Part_1();
+                Outside_Cave_Part_1();
 
-                // Inside_Cave();
+                Inside_Cave();
             
-                // Outside_Cave_Part_2();
+                Outside_Cave_Part_2();
 
 
                 while (1) {

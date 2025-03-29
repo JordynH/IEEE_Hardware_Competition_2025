@@ -9,12 +9,12 @@ double TA_CLOSE = 0.12;
 void Outside_Cave_Part_1() {
     dc_set_speed(&robot_singleton.intakeMotor, -75);
 
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.35);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.5);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.45);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.45);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.5);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.6);
-    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.65);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.5);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
+    move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.25);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 2.85);
 
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.85);
@@ -30,6 +30,8 @@ void Outside_Cave_Part_1() {
     move_pid_time(robot_singleton.omniMotors, LEFT, 15, 0.5);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.75);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
+
+    perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, 22);
 
     aprilTag_main(-1, 0.08);
 
@@ -52,10 +54,10 @@ void Inside_Cave() {
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
 
     // Inner loop, d == 1
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
@@ -68,10 +70,10 @@ void Inside_Cave() {
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
 
     // Inner loop, d == 1:
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
@@ -84,26 +86,34 @@ void Inside_Cave() {
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
 
     // Inner loop, d == 1:
-    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.45);
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.7);
     move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
 
     // Advance to new AprilTag depth.
     move_pid_time(robot_singleton.omniMotors, FORWARD, 15, 0.7);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 0.7);
+
+    perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, 22);
+
+    aprilTag_main(-1, 0.08);
 
     // Move backwards to allow a 180° turn.
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 15, 1.25);
 
-    aprilTag_main(-1, 0.08);
     
-    // Final alignment: rotate 180° and exit.
-    move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
-    // Rotate right and exit cave sideways.
-    move_pid_time(robot_singleton.omniMotors, LEFT, 15, 3);
+    
+    // // Final alignment: rotate 180° and exit.
+    // move_pid_time(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, 15, 1.4);
+    // // Rotate right and exit cave sideways.
+    // move_pid_time(robot_singleton.omniMotors, LEFT, 15, 3);
+
+    move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 1.4);
+    move_pid_time(robot_singleton.omniMotors, RIGHT, 15, 2);
 
     led_set_brightness(NULL, 50);
 

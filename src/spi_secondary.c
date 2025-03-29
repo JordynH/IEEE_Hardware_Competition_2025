@@ -32,7 +32,7 @@ void monitor_stack_usage() {
     // Get the current stack high-water mark for the task
     UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(NULL);  // NULL for current task
 
-    printf("High water mark (remaining stack): %u words\n", highWaterMark);
+    // printf("High water mark (remaining stack): %u words\n", highWaterMark);
 }
 
 esp_err_t spi_secondary_init(void) {
@@ -95,7 +95,7 @@ void spi_secondary_task(void *arg) {
     transaction.rx_buffer = new_buf;  // Buffer to receive data
 
     while (1) {
-        ESP_LOGI(TAG, "another one");
+        // ESP_LOGI(TAG, "another one");
         // Wait for master to send data
         memset(new_buf, 0, sizeof(new_buf));
         // if (strlen(command_to_send) > 0) {
@@ -103,7 +103,7 @@ void spi_secondary_task(void *arg) {
         //     command_to_send[0] = '\0';
         //     command_flag = true;
         // }
-        ESP_LOGI(TAG, "another two");
+        // ESP_LOGI(TAG, "another two");
         if (strlen(command_to_send) > 0) {
             memset(send_buf, 0, sizeof(send_buf));  // Clear old data
             size_t len = strlen(command_to_send);
@@ -113,7 +113,7 @@ void spi_secondary_task(void *arg) {
             command_to_send[0] = '\0';  // Mark message as sent
             command_flag = true;
             // ESP_LOGI(TAG, "sent: %s", command_to_send);
-            ESP_LOGI(TAG, "sent");
+            // ESP_LOGI(TAG, "sent");
         }
 
         
@@ -132,16 +132,16 @@ void spi_secondary_task(void *arg) {
             // Append received data to json_buffer
 
             if (strncmp(new_buf, END_SIGNAL, strlen(END_SIGNAL)) == 0) {
-                ESP_LOGI(TAG, "End of Transmission received");
+                // ESP_LOGI(TAG, "End of Transmission received");
                 //ESP_LOGI(TAG, "%s", received_buffer);
                 process_received_data(received_buffer);
                 ++count;
-                ESP_LOGI(TAG, "%d", count);
+                // ESP_LOGI(TAG, "%d", count);
                 if (!received_buffer) {
                     free(received_buffer);
                     received_buffer = NULL;
                 }
-                ESP_LOGI(TAG, "si senor");
+                // ESP_LOGI(TAG, "si senor");
                 received_buffer_size = 0;
             } else {
 
@@ -169,7 +169,7 @@ void process_received_data(char *input) {
         ESP_LOGE(TAG, "nuh uh bud");
         return;
     }
-    ESP_LOGI(TAG, "HEAP: %u", (unsigned int)esp_get_free_heap_size());
+    // ESP_LOGI(TAG, "HEAP: %u", (unsigned int)esp_get_free_heap_size());
     // ESP_LOGI(TAG, "is this a thing or no: ");
     char message_type = input[0];
 
@@ -209,7 +209,7 @@ void process_received_data(char *input) {
 
                 //cJSON_Delete(receivedJson);
             } else {
-                ESP_LOGI(TAG, "Valid JSON received");
+                // ESP_LOGI(TAG, "Valid JSON received");
                 if(xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
                     if(receivedData.jsonInput != NULL) {
                         cJSON_Delete(receivedData.jsonInput);
@@ -220,7 +220,7 @@ void process_received_data(char *input) {
                 } else {
                     cJSON_Delete(receivedJson);
                 }
-                ESP_LOGI(TAG, "no fun or games");
+                // ESP_LOGI(TAG, "no fun or games");
                 // if (get_v()) {
                 //     if (get_pID() == 1) {
                 //         update_ema(&purple_object_ema);
@@ -254,7 +254,7 @@ void process_received_data(char *input) {
             // ESP_LOGI(TAG, "message: %s", get_message());
             break;
     }
-    ESP_LOGI(TAG, "ah ha");
+    // ESP_LOGI(TAG, "ah ha");
 }
 
 void send_message(char *message) {
@@ -271,7 +271,7 @@ char* get_message() {
         if (receivedData.messageInput != NULL) {
             returnMessage = receivedData.messageInput;
         } else {
-            ESP_LOGW(TAG, "messageInput is NULL");
+            // ESP_LOGW(TAG, "messageInput is NULL");
             returnMessage = NULL;
         }
         xSemaphoreGive(data_mutex);
@@ -288,7 +288,7 @@ cJSON* get_last_json() {
             // NOTE: The caller MUST NOT free this pointer.
             returnJSON = receivedData.jsonInput;
         } else {
-            ESP_LOGW(TAG, "receivedData.jsonInput is NULL");
+            // ESP_LOGW(TAG, "receivedData.jsonInput is NULL");
             // Create an empty object; the caller is responsible for freeing
             // this object if it's used, but ideally this branch is rarely hit.
             returnJSON = cJSON_CreateObject();
@@ -296,7 +296,7 @@ cJSON* get_last_json() {
 
         xSemaphoreGive(data_mutex);
     } else {
-        ESP_LOGW(TAG, "Failed to take semaphore");
+        // ESP_LOGW(TAG, "Failed to take semaphore");
         returnJSON = cJSON_CreateObject();
     }
 
@@ -318,11 +318,11 @@ double get_retro_ta() {
 
     cJSON *ta = cJSON_GetObjectItem(retro_item, "ta");
     if (!ta || !cJSON_IsNumber(ta)) {
-        ESP_LOGW(TAG, "ta not found or not a number");
+        // ESP_LOGW(TAG, "ta not found or not a number");
         return 0.0;
     }
 
-    ESP_LOGI(TAG, "Retro ta: %f", ta->valuedouble);
+    // ESP_LOGI(TAG, "Retro ta: %f", ta->valuedouble);
     return ta->valuedouble;
 }
 
@@ -335,11 +335,11 @@ double get_retro_tx() {
 
     cJSON *tx = cJSON_GetObjectItem(retro_item, "tx");
     if (!tx || !cJSON_IsNumber(tx)) {
-        ESP_LOGW(TAG, "tx not found or not a number");
+        // ESP_LOGW(TAG, "tx not found or not a number");
         return 0.0;
     }
 
-    ESP_LOGI(TAG, "Retro tx: %f", tx->valuedouble);
+    // ESP_LOGI(TAG, "Retro tx: %f", tx->valuedouble);
     return tx->valuedouble;
 }
 
@@ -352,11 +352,11 @@ double get_retro_tx_nocross() {
 
     cJSON *tx_nocross = cJSON_GetObjectItem(retro_item, "tx_nocross");
     if (!tx_nocross || !cJSON_IsNumber(tx_nocross)) {
-        ESP_LOGW(TAG, "tx_nocross not found or not a number");
+        // ESP_LOGW(TAG, "tx_nocross not found or not a number");
         return 0.0;
     }
 
-    ESP_LOGI(TAG, "Retro tx_nocross: %f", tx_nocross->valuedouble);
+    // ESP_LOGI(TAG, "Retro tx_nocross: %f", tx_nocross->valuedouble);
     return tx_nocross->valuedouble;
 }
 
@@ -369,11 +369,11 @@ double get_retro_txp() {
 
     cJSON *txp = cJSON_GetObjectItem(retro_item, "txp");
     if (!txp || !cJSON_IsNumber(txp)) {
-        ESP_LOGW(TAG, "txp not found or not a number");
+        // ESP_LOGW(TAG, "txp not found or not a number");
         return 0.0;
     }
 
-    ESP_LOGI(TAG, "Retro txp: %f", txp->valuedouble);
+    // ESP_LOGI(TAG, "Retro txp: %f", txp->valuedouble);
     return txp->valuedouble;
 }
 
@@ -386,11 +386,11 @@ double get_retro_ty() {
 
     cJSON *ty = cJSON_GetObjectItem(retro_item, "ty");
     if (!ty || !cJSON_IsNumber(ty)) {
-        ESP_LOGW(TAG, "ty not found or not a number");
+        // ESP_LOGW(TAG, "ty not found or not a number");
         return 0.0;
     }
 
-    ESP_LOGI(TAG, "Retro ty: %f", ty->valuedouble);
+    // ESP_LOGI(TAG, "Retro ty: %f", ty->valuedouble);
     return ty->valuedouble;
 }
 
@@ -403,11 +403,11 @@ double get_retro_ty_nocross() {
 
     cJSON *ty_nocross = cJSON_GetObjectItem(retro_item, "ty_nocross");
     if (!ty_nocross || !cJSON_IsNumber(ty_nocross)) {
-        ESP_LOGW(TAG, "ty_nocross not found or not a number");
+        // ESP_LOGW(TAG, "ty_nocross not found or not a number");
         return 0.0;
     }
 
-    ESP_LOGI(TAG, "Retro ty_nocross: %f", ty_nocross->valuedouble);
+    // ESP_LOGI(TAG, "Retro ty_nocross: %f", ty_nocross->valuedouble);
     return ty_nocross->valuedouble;
 }
 
@@ -420,11 +420,11 @@ double get_retro_typ() {
 
     cJSON *typ = cJSON_GetObjectItem(retro_item, "typ");
     if (!typ || !cJSON_IsNumber(typ)) {
-        ESP_LOGW(TAG, "typ not found or not a number");
+        // ESP_LOGW(TAG, "typ not found or not a number");
         return 0.0;
     }
 
-    ESP_LOGI(TAG, "Retro typ: %f", typ->valuedouble);
+    // ESP_LOGI(TAG, "Retro typ: %f", typ->valuedouble);
     return typ->valuedouble;
 }
 
@@ -472,7 +472,7 @@ void get_point_at_index(int index, double* ret) {
 
     // (Optional) Debug print the JSON. Remember to free the printed string.
     char *jsonprint = cJSON_Print(pts);
-    ESP_LOGI(TAG, "Fiducial Points JSON: %s", jsonprint);
+    // ESP_LOGI(TAG, "Fiducial Points JSON: %s", jsonprint);
     free(jsonprint);
 
     // Check if the requested index is within bounds.
@@ -482,7 +482,7 @@ void get_point_at_index(int index, double* ret) {
         return;
     }
 
-    ESP_LOGI(TAG, "interstellar");
+    // ESP_LOGI(TAG, "interstellar");
     // Get the point at the desired index (0 for bottom left, 1 for bottom right)
     cJSON *point = cJSON_GetArrayItem(pts, index);
     if (!point) {
@@ -490,7 +490,7 @@ void get_point_at_index(int index, double* ret) {
         return;
     }
 
-    ESP_LOGI(TAG, "i am groot");
+    // ESP_LOGI(TAG, "i am groot");
 
     cJSON *x_item = cJSON_GetArrayItem(point, 0);
     cJSON *y_item = cJSON_GetArrayItem(point, 1);
@@ -500,7 +500,7 @@ void get_point_at_index(int index, double* ret) {
     }
     // Free the JSON object if get_fiducial_pts() returns a new allocation.
     //cJSON_Delete(pts);
-    ESP_LOGI(TAG, "completar");
+    // ESP_LOGI(TAG, "completar");
 }
 
 
@@ -534,7 +534,7 @@ double get_fiducial_ta() {
         return 0.0;
     }
 
-    ESP_LOGI(TAG, "Fiducial ta: %f", ta->valuedouble);
+    // ESP_LOGI(TAG, "Fiducial ta: %f", ta->valuedouble);
     return ta->valuedouble;
 }
 
@@ -551,7 +551,7 @@ double get_fiducial_tx() {
         return 0.0;
     }
 
-    ESP_LOGI(TAG, "Fiducial tx: %f", tx->valuedouble);
+    // ESP_LOGI(TAG, "Fiducial tx: %f", tx->valuedouble);
     return tx->valuedouble;
 }
 
@@ -700,7 +700,7 @@ int get_v() {
         return 0;
     }
 
-    ESP_LOGI(TAG, "v: %d", v->valueint);
+    // ESP_LOGI(TAG, "v: %d", v->valueint);
     return v->valueint;
 }
 

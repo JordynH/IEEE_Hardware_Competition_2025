@@ -61,7 +61,7 @@ void led_set_brightness(led_t *led, int brightness) {
     if (err != ESP_OK) {
         ESP_LOGE("LED", "set duty failed: %s", esp_err_to_name(err));
     } else {
-        ESP_LOGI("LED", "duty set to %d", (int)duty);
+        // ESP_LOGI("LED", "duty set to %d", (int)duty);
     }
     err = ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
     if (err != ESP_OK) {
