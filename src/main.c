@@ -10,24 +10,15 @@
  */
 
 #include "main_helpers.h"
-#include "Search_paths.h"
-#include "rtc_wdt.h"
-#include "rtc.h"
+
 
 
 #define TAG "MAIN"
 
 int64_t start_time_us;
 
-/* Command Key
-    Px Commands = Switch to Pipeline x    
-*/
-
 int app_main() {
-    esp_reset_reason_t resetReason = esp_reset_reason();
-    ESP_LOGI(TAG, "Reset reason (code): %d", resetReason);
-    
-    esp_log_level_set("*", ESP_LOG_VERBOSE);
+
     if (setup() != 0) {
         for (int jordyn = 0; jordyn < 7; ++jordyn) {
             led_flash(&robot_singleton.headlight);
@@ -37,17 +28,6 @@ int app_main() {
         vTaskDelay(200);
         esp_restart();
     }
-
-    // outtake_dump(&robot_singleton.outtakeMotor);
-    // ESP_LOGI("MAIN", "got here");
-    // while (1) {
-    //     vTaskDelay(100);
-    //     led_flash(&robot_singleton.headlight);
-    // }
-
-    // led_set_brightness(&robot_singleton.headlight, 0);
-    
-
     state_t currentState;
     currentState = READY;       // Begin in READY mode
 
@@ -67,8 +47,6 @@ int app_main() {
                 currentState = FULL_SEARCH;
                 break;
             case FULL_SEARCH:
-
-                // Short_Search_All();  
 
                 Outside_Cave_Part_1();
 

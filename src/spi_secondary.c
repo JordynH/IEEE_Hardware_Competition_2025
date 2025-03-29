@@ -28,13 +28,6 @@ EMAState april_tag_ema;
 EMAState line_following_ema;
 SemaphoreHandle_t data_mutex;
 
-void monitor_stack_usage() {
-    // Get the current stack high-water mark for the task
-    UBaseType_t highWaterMark = uxTaskGetStackHighWaterMark(NULL);  // NULL for current task
-
-    // printf("High water mark (remaining stack): %u words\n", highWaterMark);
-}
-
 esp_err_t spi_secondary_init(void) {
     data_mutex = xSemaphoreCreateMutex();
 

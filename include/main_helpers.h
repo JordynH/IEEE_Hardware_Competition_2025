@@ -10,6 +10,7 @@
 #include "spi_secondary.h"
 #include "led.h"
 #include "math.h"
+#include "Search_paths.h"
 
 typedef struct {
     led_t headlight;

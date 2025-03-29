@@ -109,14 +109,12 @@ void full_motor_init() {
 }
 
 void aprilTag_main(int desired_fid, double ta_target) {
-    // switch_pipeline(6);
-    // ESP_LOGI(TAG, "1111111111");
     int done = 0;
 
     double dy_threshold = 4;
     double tx_threshold = 3;
     double tx_epsilon = 10;
-    double ta_epsilon = 0.01;
+    double ta_epsilon = 0.005; // CHANGED THIS
     double ta_temp = 0.0;
     double ta = 0.0;
     double tx = 0.0;
@@ -124,21 +122,12 @@ void aprilTag_main(int desired_fid, double ta_target) {
     double bottom_right[2];
     double bottom_left[2];
     double dy = 0.0;
-    // ESP_LOGI(TAG, "2");
     while (!done) {
-        // ESP_LOGI(TAG, "3");
-        while (get_v() == 0) { // FIXME: Check accuracy of hard-coded path and potentially 
-                            // make this a while loop with a maneuver.
-
-            // led_flash(&robot_singleton.headlight);
+        while (get_v() == 0) {
             vTaskDelay(pdMS_TO_TICKS(20));
-            // ESP_LOGI(TAG, "4");
         }
-        // ESP_LOGI(TAG, "5");
         int aligned = 0;
         while (!aligned) {
-            // monitor_stack_usage();
-            // ESP_LOGI(TAG, "6");
             tx = 0.0;
             tx_tmp = 0.0;
 
@@ -152,14 +141,12 @@ void aprilTag_main(int desired_fid, double ta_target) {
             if (fabs(bottom_right[1] - bottom_left[1]) > 0.00001) {
                 dy = bottom_right[1] - bottom_left[1];
             }
+
             // --- STRAFE until centered ---
             while (fabs(tx) > tx_threshold) {
-                // ESP_LOGI(TAG, "7");
-                // monitor_stack_usage();
                 ta_temp = get_fiducial_ta();
                 if (ta_temp > 0.00001) {
                     ta = ta_temp;
-                    // ESP_LOGI("bananaman", "namananab %f" , ta);
                 }
                 if (tx < -tx_threshold) {
                     perform_maneuver(robot_singleton.omniMotors, LEFT, NULL, (23 * (1 - ta)));
@@ -167,18 +154,14 @@ void aprilTag_main(int desired_fid, double ta_target) {
                     perform_maneuver(robot_singleton.omniMotors, RIGHT, NULL, (23 * (1 - ta)));
                 }
                 vTaskDelay(pdMS_TO_TICKS(20));
-                // Refresh tx reading
+                
                 tx_tmp = get_fiducial_tx();
                 if (fabs(tx_tmp) > 0.00001) {
                     tx = tx_tmp;
                 }
-                // ESP_LOGI("MAIN", "tx: %f" , fabs(tx));
-                // ESP_LOGI(TAG, "8");
             }
             perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
-            
-            // ESP_LOGI(TAG, "I did it! I got past the tx threshold! Here's my final tx value: %f" , fabs(tx));
-
+        
             // --- ROTATE until epsilon ---
             get_point_at_index(0, bottom_left);
             get_point_at_index(1, bottom_right);
@@ -186,7 +169,6 @@ void aprilTag_main(int desired_fid, double ta_target) {
                 dy = bottom_right[1] - bottom_left[1];
             }
             
-            //&& (fabs(tx) < tx_epsilon)
             if ((dy < (-1 * dy_threshold)) && (fabs(tx) < tx_epsilon)) {
                 perform_maneuver(robot_singleton.omniMotors, ROTATE_COUNTERCLOCKWISE, NULL, 16);
             } else if ((dy > dy_threshold) && (fabs(tx) < tx_epsilon)) {
@@ -213,11 +195,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
                 if (fabs(tx_tmp) > 0.00001) {
                     tx = tx_tmp;
                 }
-                // ESP_LOGI(TAG, "dy value: %f" , fabs(dy));
-                //ESP_LOGI(TAG, "Here's the heap size: %u", (unsigned int)esp_get_free_heap_size());
             }
-
-            // ESP_LOGI(TAG, "I did it! I got past the dy threshold! Here's my final dy value: %f" , fabs(dy));
 
             // Stop strafing when either:
             // - dy is small enough (aligned)
@@ -252,29 +230,15 @@ void aprilTag_main(int desired_fid, double ta_target) {
         ta = 0.0;
         ta_temp = 0.0;
         while (!distance_done) {
-            // monitor_stack_usage();
-
             ta_temp = get_fiducial_ta();
             if (ta_temp > 0.00001) {
                 ta = ta_temp;
-                // ESP_LOGI("bananaman", "namananab %f" , ta);
             }
-            // ESP_LOGI("JORDYN", "(THIS IS SPAR)TA = %f" , ta);
 
             if (ta < (ta_target - ta_epsilon)) {
                 perform_maneuver(robot_singleton.omniMotors, FORWARD, NULL, (18 * (1 - ta)));
-                // while (get_fiducial_ta() < (ta_target - ta_epsilon)) {
-                //     // ESP_LOGI("TAG", "Whiskey TAngo = %f" , ta);
-                //     vTaskDelay(pdMS_TO_TICKS(20));
-                // }
-                // perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
             } else if (ta > (ta_target + ta_epsilon)) {
                 perform_maneuver(robot_singleton.omniMotors, BACKWARD, NULL, (18 * (1 - ta)));
-                // while (get_fiducial_ta() > (ta_target + ta_epsilon)) {
-                //     // ESP_LOGI("quaker", "i cant graduate because i dont know waht a gant chart is = %f" , ta);
-                //     vTaskDelay(pdMS_TO_TICKS(20));
-                // }
-                // perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
             } else {
                 distance_done = 1;
             }
@@ -297,8 +261,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
         }
     }
 
-    perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0); // HERE
-    // monitor_stack_usage();
+    perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
 }
 
 
@@ -430,7 +393,7 @@ void dump_in_geo() {
     // move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.5);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
     move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 1.65);
-    move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 1.35);
+    move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 1.55);
     dc_set_speed(&robot_singleton.intakeMotor, 0);
     outtake_dump(&robot_singleton.outtakeMotor);
     vTaskDelay(pdMS_TO_TICKS(800));    
