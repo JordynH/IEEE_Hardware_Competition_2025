@@ -105,11 +105,12 @@ void full_motor_init() {
     dc_set_speed(&robot_singleton.outtakeMotor, 0);
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
     servo_set_angle(&robot_singleton.armMotor, 60);
-    // outtake_reset(&robot_singleton.outtakeMotor);
+    outtake_reset(&robot_singleton.outtakeMotor);
 }
 
 void aprilTag_main(int desired_fid, double ta_target) {
     // switch_pipeline(6);
+    ESP_LOGI(TAG, "1");
     int done = 0;
 
     double dy_threshold = 3;
@@ -118,28 +119,34 @@ void aprilTag_main(int desired_fid, double ta_target) {
     double ta_epsilon = 0.01;
     double ta_temp = 0.0;
     double ta = 0.0;
-
+    double tx = 0.0;
+    double tx_tmp = 0.0;
+    double bottom_right[2];
+    double bottom_left[2];
+    double dy = 0.0;
+    ESP_LOGI(TAG, "2");
     while (!done) {
+        ESP_LOGI(TAG, "3");
         while (get_v() == 0) { // FIXME: Check accuracy of hard-coded path and potentially 
                             // make this a while loop with a maneuver.
 
             led_flash(&robot_singleton.headlight);
             vTaskDelay(pdMS_TO_TICKS(20));
+            ESP_LOGI(TAG, "4");
         }
-
+        ESP_LOGI(TAG, "5");
         int aligned = 0;
         while (!aligned) {
-
-            double tx = 0.0;
-            double tx_tmp = 0.0;
+            monitor_stack_usage();
+            ESP_LOGI(TAG, "6");
+            tx = 0.0;
+            tx_tmp = 0.0;
 
             tx_tmp = get_fiducial_tx();
             if (fabs(tx_tmp) > 0.00001) {
                 tx = tx_tmp;
             }
-            double bottom_left[2];
-            double bottom_right[2];
-            double dy = 0.0;
+            dy = 0.0;
             get_point_at_index(0, bottom_left);
             get_point_at_index(1, bottom_right);
             if (fabs(bottom_right[1] - bottom_left[1]) > 0.00001) {
@@ -147,6 +154,8 @@ void aprilTag_main(int desired_fid, double ta_target) {
             }
             // --- STRAFE until centered ---
             while (fabs(tx) > tx_threshold) {
+                ESP_LOGI(TAG, "7");
+                monitor_stack_usage();
                 ta_temp = get_fiducial_ta();
                 if (ta_temp > 0.00001) {
                     ta = ta_temp;
@@ -164,9 +173,10 @@ void aprilTag_main(int desired_fid, double ta_target) {
                     tx = tx_tmp;
                 }
                 ESP_LOGI("MAIN", "tx: %f" , fabs(tx));
+                ESP_LOGI(TAG, "8");
             }
             perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0);
-
+            
             ESP_LOGI(TAG, "I did it! I got past the tx threshold! Here's my final tx value: %f" , fabs(tx));
 
             // --- ROTATE until epsilon ---
@@ -187,6 +197,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
             // Not aligned (dy > threshold)
             // Still centered (tx < epsilon)
             while ((fabs(dy) > dy_threshold) && (fabs(tx) < tx_epsilon)) {
+                monitor_stack_usage();
 
                 vTaskDelay(pdMS_TO_TICKS(20));
 
@@ -240,6 +251,8 @@ void aprilTag_main(int desired_fid, double ta_target) {
         ta = 0.0;
         ta_temp = 0.0;
         while (!distance_done) {
+            monitor_stack_usage();
+
             ta_temp = get_fiducial_ta();
             if (ta_temp > 0.00001) {
                 ta = ta_temp;
@@ -267,14 +280,12 @@ void aprilTag_main(int desired_fid, double ta_target) {
 
             vTaskDelay(pdMS_TO_TICKS(10));
         }
-        double tx_tmp = get_fiducial_tx();
-        double tx = 0.0;
+        tx_tmp = get_fiducial_tx();
+        tx = 0.0;
         if (fabs(tx_tmp) > 0.00001) {
             tx = tx_tmp;
         }
-        double bottom_left[2];
-        double bottom_right[2];
-        double dy = 0.0;
+        dy = 0.0;
         get_point_at_index(0, bottom_left);
         get_point_at_index(1, bottom_right);
         if (fabs(bottom_right[1] - bottom_left[1]) > 0.00001) {
@@ -286,6 +297,7 @@ void aprilTag_main(int desired_fid, double ta_target) {
     }
 
     perform_maneuver(robot_singleton.omniMotors, STOP, NULL, 0); // HERE
+    monitor_stack_usage();
 }
 
 void wiring_test_sequence() {
@@ -411,13 +423,14 @@ void power_test_sequence() {
 }
 
 void dump_in_geo() {
+    monitor_stack_usage();
     aprilTag_main(-1, 0.1);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
     move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 1.75);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.85);
-    // outtake_dump(&robot_singleton.outtakeMotor);
+    outtake_dump(&robot_singleton.outtakeMotor);
     vTaskDelay(pdMS_TO_TICKS(800));
-    // outtake_reset(&robot_singleton.outtakeMotor);
+    outtake_reset(&robot_singleton.outtakeMotor);
 }
 
 // void setup_start_led() {

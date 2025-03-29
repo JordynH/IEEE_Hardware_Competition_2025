@@ -11,6 +11,9 @@
 
 #include "main_helpers.h"
 #include "Search_paths.h"
+#include "rtc_wdt.h"
+#include "rtc.h"
+
 
 #define TAG "MAIN"
 
@@ -41,6 +44,8 @@ int app_main() {
     //     vTaskDelay(100);
     //     led_flash(&robot_singleton.headlight);
     // }
+
+    // led_set_brightness(&robot_singleton.headlight, 0);
     
 
     state_t currentState;
@@ -55,6 +60,9 @@ int app_main() {
                 break;
             case READY:
                 wait_for_push_start();
+                vTaskDelay(pdMS_TO_TICKS(5000));
+                // wait_for_push_start();
+                // wait_for_push_start();
                 // currentState = START_LED_SENSE;
                 currentState = FULL_SEARCH;
                 break;

@@ -95,6 +95,7 @@ void spi_secondary_task(void *arg) {
     transaction.rx_buffer = new_buf;  // Buffer to receive data
 
     while (1) {
+        ESP_LOGI(TAG, "another one");
         // Wait for master to send data
         memset(new_buf, 0, sizeof(new_buf));
         // if (strlen(command_to_send) > 0) {
@@ -102,7 +103,7 @@ void spi_secondary_task(void *arg) {
         //     command_to_send[0] = '\0';
         //     command_flag = true;
         // }
-
+        ESP_LOGI(TAG, "another two");
         if (strlen(command_to_send) > 0) {
             memset(send_buf, 0, sizeof(send_buf));  // Clear old data
             size_t len = strlen(command_to_send);
@@ -112,6 +113,7 @@ void spi_secondary_task(void *arg) {
             command_to_send[0] = '\0';  // Mark message as sent
             command_flag = true;
             // ESP_LOGI(TAG, "sent: %s", command_to_send);
+            ESP_LOGI(TAG, "sent");
         }
 
         
@@ -130,15 +132,16 @@ void spi_secondary_task(void *arg) {
             // Append received data to json_buffer
 
             if (strncmp(new_buf, END_SIGNAL, strlen(END_SIGNAL)) == 0) {
-                // ESP_LOGI(TAG, "End of Transmission received");
+                ESP_LOGI(TAG, "End of Transmission received");
                 //ESP_LOGI(TAG, "%s", received_buffer);
                 process_received_data(received_buffer);
                 ++count;
-                // ESP_LOGI(TAG, "%d", count);
+                ESP_LOGI(TAG, "%d", count);
                 if (!received_buffer) {
                     free(received_buffer);
                     received_buffer = NULL;
                 }
+                ESP_LOGI(TAG, "si senor");
                 received_buffer_size = 0;
             } else {
 
@@ -156,6 +159,7 @@ void spi_secondary_task(void *arg) {
                 received_buffer_size = new_size;
                 received_buffer[received_buffer_size] = '\0';
             }
+            
         }
     }
 }
@@ -238,7 +242,7 @@ void process_received_data(char *input) {
                 // double ta_value = get_ema_ta(&purple_object_ema);
                 // ESP_LOGI(TAG, "Current TA EMA: %f", ta_value);
             }
-            monitor_stack_usage();
+            // monitor_stack_usage();
             
             break;
         case 'M':
