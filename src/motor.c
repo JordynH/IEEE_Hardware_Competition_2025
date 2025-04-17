@@ -1,19 +1,4 @@
-/**
- * @file motor.c
- * @brief Motor setup and control functions
- * 
- * This file defines and implements the functions to initialize and control DC motors using the MCPWM peripheral on the ESP32.
- * This file also defines and implements functions to control a servo motor using the MCPWM peripheral.
- * 
- * @author Solomon Tolson
- * @version 1.1
- * @date 2025-02-11
- * @modified 2025-03-17
- */
-
 #include "motor.h"
-
-
 #include "esp_log.h"
 
 #define SERVO_MIN_PULSEWIDTH_US 500   // Minimum pulse width in microseconds
@@ -23,20 +8,8 @@
 #define FORWARD_SPEED_CONSTANT  0.66   // Feet per second
 #define STRAFE_SPEED_CONSTANT 0.5      // Feet per second
 #define ROTATE_SPEED_CONSTANT 42        // degrees per second
-
-// --- PID & Encoder Definitions for Closed-Loop Movement ---
-// 5203 series Yellow Jacket motors have a gear ratio of 19.2:1.
-// Since the raw encoder produces ~537.7 ticks per motor revolution, the effective ticks per wheel revolution are:
-#define RAW_TICKS_PER_REV 537.7
-#define GEAR_RATIO 19.2
-#define TICKS_PER_REV 268
 #define MAX_ENCODER_VELOCITY_TICKS 1300
 #define UPDATE_INTERVAL_MS 50
-
-// Define your wheel’s diameter in feet. (For example, if the wheel is 96 mm = 3.78 inches, then ~0.315 feet.)
-#define WHEEL_DIAMETER_FEET 0.3412
-#define WHEEL_CIRCUMFERENCE_FEET (WHEEL_DIAMETER_FEET * 3.14159265358979)
-
 
 mcpwm_timer_handle_t timers[2][3];      // Array of 3 timers in each of 2 groups
 mcpwm_oper_handle_t opers[2][3];        // Array of 3 operators in each of 2 groups
@@ -90,12 +63,6 @@ void motor_control_init(motor_t *motor) {
  
     mcpwm_generator_set_action_on_compare_event(motor->gen,
         MCPWM_GEN_COMPARE_EVENT_ACTION(MCPWM_TIMER_DIRECTION_UP, motor->comparator, MCPWM_GEN_ACTION_LOW));
- 
-    // Assign PWM output pin
- 
-    //ESP_LOGI("MOTOR", "Initialized motor on pin %d", motor->pwm_pin);
-
-    
 }
  
 void servo_set_angle(motor_t *servo, float angle) {
@@ -247,7 +214,6 @@ void perform_maneuver(motor_t *motors, maneuver_t maneuver, float speeds[4], flo
 }
 
 void outtake_dump(motor_t *outtakeMotor) {
-    
     int64_t start_time = esp_timer_get_time();
     int64_t elapsed_time = 0;
     int64_t end_time = 3250000;
@@ -263,14 +229,10 @@ void outtake_reset(motor_t *outtakeMotor) {
     dc_set_speed(outtakeMotor, -25);
     // Wait until the limit switch is triggered (i.e., digital reading goes low).
     while (gpio_get_level(GPIO_NUM_14) != 0) {
-        // ESP_LOGI(TAG, "lowering the buck, %d", gpio_get_level(GPIO_NUM_14));
+        // ESP_LOGI(TAG, "lowering the bucket, %d", gpio_get_level(GPIO_NUM_14));
         vTaskDelay(pdMS_TO_TICKS(100));
     }
     ESP_LOGI(TAG, "lowered, %d", gpio_get_level(GPIO_NUM_14));
-    // dc_set_speed(outtakeMotor, 10);
-    // while (gpio_get_level(GPIO_NUM_12) == 0) {
-    //     vTaskDelay(pdMS_TO_TICKS(100));
-    // }
     dc_set_speed(outtakeMotor, 0);
 }
 
@@ -304,20 +266,7 @@ void rotate_angle_hardcode(motor_t *motors, maneuver_t maneuver, float speed_sca
     perform_maneuver(motors, STOP, NULL, 0); 
 }
 
-//*****************************************************************************
-// New PID-based Closed-Loop Movement Functions
-//*****************************************************************************
-
-// /**
-//  * @brief Converts a distance in feet to the number of encoder ticks.
-//  */
-// static int distance_to_ticks(double distance_feet) {
-//     return (int)((distance_feet / WHEEL_CIRCUMFERENCE_FEET) * TICKS_PER_REV);
-// }
-
-
 void move_pid_time(motor_t *motors, maneuver_t maneuver, float speed_scalar, double duration_seconds) {
-    // Determine the desired angular velocity (in encoder ticks per second) based on desired speed
     double target_velocity = (speed_scalar / 100.0) * MAX_ENCODER_VELOCITY_TICKS;
 
     // Define the direction multipliers for each motor (FR, FL, BR, BL)
@@ -352,17 +301,9 @@ void move_pid_time(motor_t *motors, maneuver_t maneuver, float speed_scalar, dou
             ESP_LOGE(TAG, "Invalid maneuver!");
             return;
     }
-
-    // Initialize encoder
-    // init_all_encoders();
     
     // Initialize PID controllers for each motor (angle-based)
     PIDController pid_fr, pid_fl, pid_br, pid_bl;
-    // pid_init(&pid_fr, 0.15, 0.05, 0.5);
-    // pid_init(&pid_fl, 0.15, 0.05, 0.5);
-    // pid_init(&pid_br, 0.15, 0.05, 0.5);
-    // pid_init(&pid_bl, 0.15, 0.05, 0.5);
-
     pid_init(&pid_fr, 1.25, 0.0, 0.03);
     pid_init(&pid_fl, 1.25, 0.0, 0.03);
     pid_init(&pid_br, 1.25, 0.0, 0.03);
@@ -381,8 +322,6 @@ void move_pid_time(motor_t *motors, maneuver_t maneuver, float speed_scalar, dou
     while ((esp_timer_get_time() - start_time) < (duration_seconds * 1e6)) {
         int64_t now = esp_timer_get_time();
         double elapsed = (now - start_time) / 1e6;
-
-        //ESP_LOGI(TAG, "Target Angle: %d", (int) target_angle);
 
         // Compute the evolving target angles for each motor
         double target_angle = target_velocity * elapsed;
@@ -409,40 +348,11 @@ void move_pid_time(motor_t *motors, maneuver_t maneuver, float speed_scalar, dou
             pid_compute(&pid_bl, target[3], current[3])
         };
 
-        //ESP_LOGI(TAG, "Read Angle: %d", (int) current_fr);
-        
-        // Apply the PID outputs (dc_set_speed clamps internally)
         for (int i = 0; i < 4; i++) {
-            dc_set_speed(&motors[i], -output[i]);  // Negative sign ensures correct direction
+            dc_set_speed(&motors[i], -output[i]); // Invert the output for the correct direction
         }
-        
         vTaskDelay(pdMS_TO_TICKS(UPDATE_INTERVAL_MS));
     }
-    
     perform_maneuver(motors, STOP, NULL, 0);
-}
-
-void move_pid_distance(motor_t *motors, maneuver_t maneuver, float speed_scalar, double distance_feet) {
-    // Base speed measurement: At speed_scalar = 15, robot moves at 9 inches/sec (0.75 ft/sec)
-    double base_speed_scalar = 15.0;
-    double base_speed_ft_per_sec = 9.4 / 12.0;  // Convert 9 in/sec to ft/sec
-
-    // Scale speed proportionally: new speed = base_speed * (speed_scalar / base_speed_scalar)
-    double actual_speed_ft_per_sec = base_speed_ft_per_sec * (speed_scalar / base_speed_scalar);
-
-    // Avoid division by zero if speed scalar is too low
-    if (actual_speed_ft_per_sec <= 0) {
-        // ESP_LOGE("MOVE_WRAPPER", "Invalid speed scalar: %.2f. Must be greater than 0.", speed_scalar);
-        return;
-    }
-
-    // Compute duration required to travel the given distance
-    double duration_seconds = distance_feet / actual_speed_ft_per_sec;
-
-    // ESP_LOGI("MOVE_WRAPPER", "Moving %.2f feet at speed_scalar %.2f for %.2f seconds", 
-            //  distance_feet, speed_scalar, duration_seconds);
-
-    // Call the movement function
-    move_pid_time(motors, maneuver, speed_scalar, duration_seconds);
 }
 

@@ -1,14 +1,3 @@
-/**
- * @file led.c
- * 
- * This file defines and implements the functions to initialize and control LEDs using the LEDC peripheral on the ESP32.
- * 
- * @author Solomon Tolson
- * @version 1.0
- * @date 2025-03-03
- * @modified 2025-03-17
- */
-
 #include "led.h"
 #include "math.h"
 

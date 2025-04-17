@@ -1,5 +1,3 @@
-
-
 #include "main_helpers.h"
 
 #define TAG "MAIN HELPER"
@@ -10,22 +8,18 @@ int setup() {
     /* 1. LED Initialization Sequence */
     led_init(&robot_singleton.headlight);
     led_set_brightness(&robot_singleton.headlight, 50);
-
     led_flash(&robot_singleton.headlight);
     vTaskDelay(pdMS_TO_TICKS(500));
 
     /* 2. Push Button, Limit Switch, LED Start Initialization */
     setup_limit_switch();
     setup_push_start();
-    // setup_start_led();
 
     /* 3. Motor Initialization Sequence */
     full_motor_init();
-
     led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);
     vTaskDelay(pdMS_TO_TICKS(500));
-
 
     /* 4. RPI SPI Communication Initialization Sequence */
     spi_secondary_init();
@@ -40,11 +34,9 @@ int setup() {
     }
     ESP_LOGI(TAG, "communication established");
     send_message("communication established");
-    //vTaskDelay(pdMS_TO_TICKS(500));
     
     // ESP_LOGI(TAG, "Waiting for Pipeline Switch");
     switch_pipeline(6);
-    
     
     led_flash(&robot_singleton.headlight);
     led_flash(&robot_singleton.headlight);
@@ -57,14 +49,10 @@ void switch_pipeline(int new_pipeline) {
     char message[5];
     sprintf(message, "P%d", new_pipeline);
     send_message(message);
-    // led_flash(&robot_singleton.headlight);
     while (get_pID() != (double)new_pipeline) {
         send_message(message);
         vTaskDelay(5);
     }
-    // led_flash(&robot_singleton.headlight);
-    // led_flash(&robot_singleton.headlight);
-
 }
 
 void full_motor_init() {
@@ -179,9 +167,6 @@ void aprilTag_main(int desired_fid, double ta_target) {
             // Not aligned (dy > threshold)
             // Still centered (tx < epsilon)
             while ((fabs(dy) > dy_threshold) && (fabs(tx) < tx_epsilon)) {
-                // ESP_LOGI(TAG, "10");
-                // monitor_stack_usage();
-
                 vTaskDelay(pdMS_TO_TICKS(20));
 
                 // Update dy and tx
@@ -190,7 +175,6 @@ void aprilTag_main(int desired_fid, double ta_target) {
                 if (fabs(bottom_right[1] - bottom_left[1]) > 0.00001) {
                     dy = bottom_right[1] - bottom_left[1];
                 }
-                // ESP_LOGI(TAG, "jordyn:");
                 tx_tmp = get_fiducial_tx();
                 if (fabs(tx_tmp) > 0.00001) {
                     tx = tx_tmp;
@@ -266,7 +250,6 @@ void aprilTag_main(int desired_fid, double ta_target) {
 
 
 void wiring_test_sequence() {
-
     /* headlights */
     for (int i = 0; i < 100; ++i) {
         int brightness = i;
@@ -318,7 +301,6 @@ void wiring_test_sequence() {
     servo_set_angle(&robot_singleton.armMotor, 150);
 
     led_flash(&robot_singleton.headlight);
-
 
     /* intake */
     dc_set_speed(&robot_singleton.intakeMotor, -100);
@@ -388,9 +370,7 @@ void power_test_sequence() {
 }
 
 void dump_in_geo() {
-    // monitor_stack_usage();
     aprilTag_main(-1, 0.06);
-    // move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 0.5);
     move_pid_time(robot_singleton.omniMotors, ROTATE_CLOCKWISE, 15, 2.75);
     move_pid_time(robot_singleton.omniMotors, RIGHT, 7.5, 1.65);
     move_pid_time(robot_singleton.omniMotors, BACKWARD, 7.5, 1.55);
@@ -400,17 +380,6 @@ void dump_in_geo() {
     outtake_reset(&robot_singleton.outtakeMotor);
     dc_set_speed(&robot_singleton.intakeMotor, -75);
 }
-
-// void setup_start_led() {
-//     gpio_config_t io_conf = {
-//         .intr_type = GPIO_INTR_DISABLE,      // disable interrupts
-//         .mode = GPIO_MODE_INPUT,             // set as input mode
-//         .pin_bit_mask = (1ULL << GPIO_NUM_14),    // bit mask for WAIT_PIN
-//         .pull_down_en = GPIO_PULLDOWN_DISABLE,
-//         .pull_up_en   = GPIO_PULLUP_DISABLE
-//     };
-//     gpio_config(&io_conf);
-// }
 
 void setup_limit_switch() {
     gpio_config_t io_conf = {

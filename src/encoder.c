@@ -12,7 +12,6 @@
 
 // Define Encoder Pins
 #define ENC_A_FR 16
-// #define ENC_B_FR 22
 #define ENC_B_FR 36
 #define ENC_A_FL 34
 #define ENC_B_FL 15

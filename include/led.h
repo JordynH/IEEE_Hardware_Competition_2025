@@ -1,15 +1,3 @@
-/**
- * @file led.h
- * @brief LED setup and control functions
- * 
- * This file declares the functions to intialize and control LEDs using the LEDC peripheral on the ESP32..
- * 
- * @author Solomon Tolson
- * @version 1.0
- * @date 2025-03-03
- * @modified 2025-03-17
- */
-
 #ifndef LED_H
 #define LED_H
 

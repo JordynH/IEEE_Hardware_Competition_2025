@@ -1,15 +1,3 @@
-/**
- * @file spi_secondary.h
- * @brief SPI Communication setup and control functions
- * 
- * This file declares the functions to initialize and control the SPI communication between the ESP and the RPi.
- * 
- * @author Solomon Tolson
- * @version 1.2
- * @date 2025-03-03
- * @modified 2025-03-17
- */
-
 #ifndef SPI_SECONDARY_H
 #define SPI_SECONDARY_H
 
@@ -93,14 +81,6 @@ int get_fiducial_fID();
 char* get_fiducial_fam();
 
 cJSON* get_fiducial_pts();
-
-// void get_point_bottom_left(double* ret);
-
-// void get_point_bottom_right(double* ret);
-
-// void get_point_top_right(double ret[2]);
-
-// void get_point_top_left(double ret[2]);
 
 void get_point_at_index(int index, double* ret);
 

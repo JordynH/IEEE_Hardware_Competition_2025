@@ -1,15 +1,3 @@
-/**
- * @file spi_secondary.c
- * @brief SPI Communication Setup and Control Functions
- * 
- * This file defines and implements the functions to initialize and control the SPI communication between the ESP and the RPi.
- * 
- * @author Solomon Tolson
- * @version 1.2
- * @date 2025-03-03
- * @modified 2025-03-19
- */
-
 #include "spi_secondary.h"
 
 #define TAG "SPI_SECONDARY"
@@ -88,15 +76,8 @@ void spi_secondary_task(void *arg) {
     transaction.rx_buffer = new_buf;  // Buffer to receive data
 
     while (1) {
-        // ESP_LOGI(TAG, "another one");
         // Wait for master to send data
         memset(new_buf, 0, sizeof(new_buf));
-        // if (strlen(command_to_send) > 0) {
-        //     memcpy(send_buf, command_to_send, strlen(command_to_send));
-        //     command_to_send[0] = '\0';
-        //     command_flag = true;
-        // }
-        // ESP_LOGI(TAG, "another two");
         if (strlen(command_to_send) > 0) {
             memset(send_buf, 0, sizeof(send_buf));  // Clear old data
             size_t len = strlen(command_to_send);
@@ -109,10 +90,6 @@ void spi_secondary_task(void *arg) {
             // ESP_LOGI(TAG, "sent");
         }
 
-        
-        //
-        //
-        //
         ret = spi_slave_transmit(SPI2_HOST, &transaction, pdMS_TO_TICKS(100));
         if (command_flag) {
             memset(send_buf, 0, sizeof(send_buf));
@@ -134,7 +111,6 @@ void spi_secondary_task(void *arg) {
                     free(received_buffer);
                     received_buffer = NULL;
                 }
-                // ESP_LOGI(TAG, "si senor");
                 received_buffer_size = 0;
             } else {
 
@@ -146,13 +122,12 @@ void spi_secondary_task(void *arg) {
                     free(received_buffer);
                     received_buffer = NULL;
                     return;
-                } // CHECK THIS
+                }
                 
                 memcpy(received_buffer + received_buffer_size, new_buf, strlen(new_buf));
                 received_buffer_size = new_size;
                 received_buffer[received_buffer_size] = '\0';
             }
-            
         }
     }
 }
@@ -163,28 +138,8 @@ void process_received_data(char *input) {
         return;
     }
     // ESP_LOGI(TAG, "HEAP: %u", (unsigned int)esp_get_free_heap_size());
-    // ESP_LOGI(TAG, "is this a thing or no: ");
     char message_type = input[0];
-
-    // size_t len = strlen(input + 1);
-    // char *message_data = malloc(len + 1);  // +1 for the null terminator
-    // if (message_data == NULL) {
-    //     ESP_LOGE(TAG, "Memory allocation failed");
-    //     return;
-    // }
-    // strcpy(message_data, input + 1);  // Now message_data is a safe, null-terminated string
-
-    // char *message_data = memmove(input, input + 1, strlen(input));
     char *message_data = input + 1;
-    // ESP_LOGI(TAG, "Message Type: %c", message_type);
-
-    // if (message_type != 'J') {
-    //     ESP_LOGI(TAG, "message not json");
-    //     ESP_LOGI(TAG, "input: %s", input);
-    //     vTaskDelay(300);
-    // }
-    //ESP_LOGI(TAG, "Message Data: %s", message_data);
-
     switch (message_type) {
         case 'J':
             //ESP_LOGI(TAG, "Processing JSON...");
@@ -198,9 +153,6 @@ void process_received_data(char *input) {
                 }
                 ESP_LOGE(TAG, "Invalid JSON!");
                 ESP_LOGI(TAG, "Message Data: %s", message_data);
-
-
-                //cJSON_Delete(receivedJson);
             } else {
                 // ESP_LOGI(TAG, "Valid JSON received");
                 if(xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
@@ -213,29 +165,7 @@ void process_received_data(char *input) {
                 } else {
                     cJSON_Delete(receivedJson);
                 }
-                // ESP_LOGI(TAG, "no fun or games");
-                // if (get_v()) {
-                //     if (get_pID() == 1) {
-                //         update_ema(&purple_object_ema);
-                //     } else if (get_pID() == 6) {
-                //         update_ema(&april_tag_ema);
-                //         double bottomRight[2];
-                //         // get_point_bottom_right(bottomRight);
-                //         get_ema_point_bottom_right(&april_tag_ema, bottomRight);
-                //         ESP_LOGI(TAG, "bottom right: %f, %f", bottomRight[0], bottomRight[1]);
-                //     } //TODO ADD LINE FOLLOWING PARSER
-                // }
-                
-                // ESP_LOGI(TAG, "Message Data: %s", message_data);
-                // char* jsonprint = cJSON_Print(receivedData.jsonInput);
-                // ESP_LOGI(TAG, "%s", jsonprint);
-                // if (strcmp(get_pTYPE(), "pipe_color") == 0) {
-                //     update_ema(&purple_object_ema);
-                // }
-                // double ta_value = get_ema_ta(&purple_object_ema);
-                // ESP_LOGI(TAG, "Current TA EMA: %f", ta_value);
             }
-            // monitor_stack_usage();
             
             break;
         case 'M':
@@ -247,7 +177,6 @@ void process_received_data(char *input) {
             // ESP_LOGI(TAG, "message: %s", get_message());
             break;
     }
-    // ESP_LOGI(TAG, "ah ha");
 }
 
 void send_message(char *message) {
@@ -260,7 +189,6 @@ void send_message(char *message) {
 char* get_message() {
     char* returnMessage = "";
     if (xSemaphoreTake(data_mutex, pdMS_TO_TICKS(100))) {
-        // ESP_LOGI("MUTEX", "mutex");
         if (receivedData.messageInput != NULL) {
             returnMessage = receivedData.messageInput;
         } else {
@@ -466,11 +394,6 @@ void get_point_at_index(int index, double* ret) {
     cJSON *pts = get_fiducial_pts();
     if (!pts) return;
 
-    // (Optional) Debug print the JSON. Remember to free the printed string.
-    // char *jsonprint = cJSON_Print(pts);
-    // // ESP_LOGI(TAG, "Fiducial Points JSON: %s", jsonprint);
-    // free(jsonprint);
-
     // Check if the requested index is within bounds.
     int array_size = cJSON_GetArraySize(pts);
     if (index < 0 || index >= array_size) {
@@ -478,7 +401,6 @@ void get_point_at_index(int index, double* ret) {
         return;
     }
 
-    // ESP_LOGI(TAG, "interstellar");
     // Get the point at the desired index (0 for bottom left, 1 for bottom right)
     cJSON *point = cJSON_GetArrayItem(pts, index);
     if (!point) {
@@ -486,17 +408,12 @@ void get_point_at_index(int index, double* ret) {
         return;
     }
 
-    // ESP_LOGI(TAG, "i am groot");
-
     cJSON *x_item = cJSON_GetArrayItem(point, 0);
     cJSON *y_item = cJSON_GetArrayItem(point, 1);
     if (x_item && y_item) {
         ret[0] = x_item->valuedouble;
         ret[1] = y_item->valuedouble;
     }
-    // Free the JSON object if get_fiducial_pts() returns a new allocation.
-    //cJSON_Delete(pts);
-    // ESP_LOGI(TAG, "completar");
 }
 
 
@@ -638,18 +555,6 @@ double get_fiducial_typ() {
     return typ->valuedouble;
 }
 
-
-// double get_pID() {
-//     cJSON *pID = cJSON_GetObjectItem(get_last_json(), "pID");
-//     if (!pID || !cJSON_IsNumber(pID)) {
-//         ESP_LOGW(TAG, "pID not found or not a number");
-//         return -1;
-//     }
-
-//     ESP_LOGI(TAG, "pID: %f", pID->valuedouble);
-//     return pID->valuedouble;
-// }
-
 double get_pID() {
     // Get the last JSON object
     cJSON *json = get_last_json();
@@ -659,17 +564,15 @@ double get_pID() {
     }
     
     // Get the pID item from the JSON
-    cJSON *pID = cJSON_GetObjectItem(json, "pID"); //crashes here
+    cJSON *pID = cJSON_GetObjectItem(json, "pID");
     
     if (!pID) {
-        // vTaskDelay(pdTICKS_TO_MS(1000));
         // ESP_LOGW(TAG, "pID not found in JSON");
         return -1;  // Return an error value if pID is missing
     }
     
     // Ensure pID is a number
     if (!cJSON_IsNumber(pID)) {
-        // vTaskDelay(pdTICKS_TO_MS(1000));
         ESP_LOGW(TAG, "pID is not a number");
         return -1;  // Return an error value if pID is not a number
     }
@@ -697,8 +600,6 @@ int get_v() {
         // ESP_LOGW(TAG, "v not found or not a number");
         return 0;
     }
-
-    // ESP_LOGI(TAG, "v: %d", v->valueint);
     return v->valueint;
 }
 
@@ -806,17 +707,6 @@ void update_ema(EMAState *ema) {
         ema->point_top_left[0] = ema->alpha * point_top_left[0] + (1.0f - ema->alpha) * ema->point_top_left[0];
         ema->point_top_left[1] = ema->alpha * point_top_left[1] + (1.0f - ema->alpha) * ema->point_top_left[1];
     }
-
-    // ESP_LOGI(TAG,
-    //     "EMA Updated | ta: %.2f | tx: %.2f | tx_nocross: %.2f | txp: %.2f | ty: %.2f | ty_nocross: %.2f | typ: %.2f",
-    //     ema->ta_ema,
-    //     ema->tx_ema,
-    //     ema->tx_nocross_ema,
-    //     ema->txp_ema,
-    //     ema->ty_ema,
-    //     ema->ty_nocross_ema,
-    //     ema->typ_ema
-    // );
 }
 
 void get_ema_point_bottom_left(const EMAState *ema, double ret[2]) {

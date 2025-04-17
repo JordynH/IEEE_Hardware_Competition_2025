@@ -1,3 +1,5 @@
+// Uncomment the code below and comment out the code in main.cpp to test the encoder functionality
+
 #include <stdio.h>
 #include "driver/pcnt.h"
 #include "esp_log.h"
@@ -22,7 +24,6 @@
 #define ENC_B_BR 39
 #define ENC_A_BL 26
 #define ENC_B_BL 35
-
 
 // void app_main(void) {
 //     // Initialize encoder
