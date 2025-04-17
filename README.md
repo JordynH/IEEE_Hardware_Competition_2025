@@ -1,0 +1,1 @@
+This code was created for the 2025 IEEE SoutheastCon Hardware Competition. All code in the repository was written for an ESP32 module in the Espressif IoT Development Framework (ESP-IDF). The ESP module communicates with a Rasperry Pi 4 via SPI communication which is handled by the code in this repo.
